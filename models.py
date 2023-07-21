@@ -14,6 +14,9 @@ class Menu(Base):
 
     submenus = relationship("Submenu", back_populates='menu', cascade='all,delete', passive_deletes=True)
 
+    def submenus_count(self):
+        return len(self.submenus)
+
 
 class Submenu(Base):
     __tablename__ = 'submenus'

@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 # List all menus
-@router.get('/', response_model=list[schemas.Menu])
+@router.get('/')
 def read_menus(db: Session = Depends(get_db)):
     db_menus = crud.get_menus(db)
     data = [
@@ -21,7 +21,7 @@ def read_menus(db: Session = Depends(get_db)):
             "id": db_menu.id,
             "title": db_menu.title,
             "description": db_menu.description,
-            "submenus_count": len(db_menu.submenus),
+            "submenus_count": db_menu.submenus_count(),
             # "dishes_count": sum(len(submenu.dishes) for submenu in submenus)
         }
         for db_menu in db_menus
@@ -45,7 +45,7 @@ def read_menu(id: UUID, response: Response, db: Session = Depends(get_db)):
             "id": db_menu.id,
             "title": db_menu.title,
             "description": db_menu.description,
-            "submenus_count": len(db_menu.submenus),
+            "submenus_count": db_menu.submenus_count(),
             # "dishes_count": sum(len(submenu.dishes) for submenu in submenus)
         }
         return data
