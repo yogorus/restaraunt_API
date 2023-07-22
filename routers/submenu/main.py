@@ -14,7 +14,7 @@ router = APIRouter(
 )
 
 # Get list of all submenus
-@router.get('/{menu_id}/submenus', status_code=200, dependencies=[Depends(check_menu_id)])
+@router.get('/{menu_id}/submenus', dependencies=[Depends(check_menu_id)])
 def read_submenus(menu_id: UUID, db: Session = Depends(get_db)):
     menu = get_menu_by_id(db, menu_id)
     submenus = crud.get_submenus(db, menu)

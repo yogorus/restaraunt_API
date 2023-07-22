@@ -26,7 +26,6 @@ def read_menus(db: Session = Depends(get_db)):
         }
         for db_menu in db_menus
     ]
-    
     return data
 
 # Create Menu
@@ -42,8 +41,6 @@ def create_menu(menu: schemas.MenuBase, db: Session = Depends(get_db)):
     }
     return data
        
-    
-    
 # Get menu by id
 @router.get('/{menu_id}', dependencies=[Depends(check_menu_id)])
 def read_menu(menu_id: UUID, db: Session = Depends(get_db)):
@@ -74,5 +71,3 @@ def delete_menu(menu_id: UUID, db: Session = Depends(get_db)):
 def patch_menu(menu_id: UUID, menu: schemas.MenuBase, db: Session = Depends(get_db)):
     db_menu = crud.get_menu_by_id(db, menu_id)
     return crud.patch_menu(db, data=menu, db_menu=db_menu)
-    
-    
