@@ -19,6 +19,9 @@ class Menu(Base):
     
     def dishes_count(self) -> int:
         return sum(submenu.dishes_count() for submenu in self.submenus)
+    
+    def get_submenus_titles(self) -> list[str]:
+        return [submenu.title for submenu in self.submenus]
 
 
 class Submenu(Base):

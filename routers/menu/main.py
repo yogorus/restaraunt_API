@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from . import crud, schemas
 
-
 sys.path.append("...")
 from database import SessionLocal, engine, get_db
 
@@ -66,10 +65,11 @@ def delete_menu(id: UUID, db: Session = Depends(get_db)):
     return HTTPException(status_code=404, detail='menu not found')
 
 # Patch menu by id
-@router.patch('/{id}')
-def patch_menu(id: UUID, menu: schemas.MenuBase, db: Session = Depends(get_db)):
+@router.patch('/{id}', status_code=200)
+def patch_menu(id: UUID, menu: schemas.MenuBase, response: Response, db: Session = Depends(get_db)):
     db_menu = crud.get_menu_by_id(db, id)
     if db_menu:
         return crud.patch_menu(db, data=menu, db_menu=db_menu)
     
-    return HTTPException(status_code=404, detail='menu not found')
+    response.status_code = 404
+    return {'detail': 'menu not found'}
