@@ -22,7 +22,7 @@ def read_menus(db: Session = Depends(get_db)):
             "title": db_menu.title,
             "description": db_menu.description,
             "submenus_count": db_menu.submenus_count(),
-            # "dishes_count": sum(len(submenu.dishes) for submenu in submenus)
+            "dishes_count": db_menu.dishes_count()
         }
         for db_menu in db_menus
     ]
@@ -34,7 +34,6 @@ def read_menus(db: Session = Depends(get_db)):
 def create_menu(menu: schemas.MenuBase, db: Session = Depends(get_db)):
     return crud.create_menu(db=db, menu=menu)
     
-
 # Get menu by id
 @router.get('/{id}', status_code=200)
 def read_menu(id: UUID, response: Response, db: Session = Depends(get_db)):
@@ -46,7 +45,7 @@ def read_menu(id: UUID, response: Response, db: Session = Depends(get_db)):
             "title": db_menu.title,
             "description": db_menu.description,
             "submenus_count": db_menu.submenus_count(),
-            # "dishes_count": sum(len(submenu.dishes) for submenu in submenus)
+            "dishes_count": db_menu.dishes_count()
         }
         return data
     
@@ -65,10 +64,6 @@ def delete_menu(id: UUID, db: Session = Depends(get_db)):
         }
     
     return HTTPException(status_code=404, detail='menu not found')
-
-    # if db_menu:
-    #     return crud.delete_menu(db, db_menu)
-    # return HTTPException(status_code=404, detail='menu not found')
 
 # Patch menu by id
 @router.patch('/{id}')

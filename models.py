@@ -14,8 +14,11 @@ class Menu(Base):
 
     submenus = relationship("Submenu", back_populates='menu', cascade='all,delete', passive_deletes=True)
 
-    def submenus_count(self):
+    def submenus_count(self) -> int:
         return len(self.submenus)
+    
+    def dishes_count(self) -> int:
+        return sum(submenu.dishes_count() for submenu in self.submenus)
 
 
 class Submenu(Base):
@@ -28,6 +31,9 @@ class Submenu(Base):
 
     menu = relationship("Menu", back_populates='submenus')
     dishes = relationship('Dish', back_populates='submenu', cascade='all,delete', passive_deletes=True)
+
+    def dishes_count(self) -> int:
+        return len(self.dishes)
 
 
 class Dish(Base):

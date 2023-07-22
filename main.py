@@ -4,6 +4,7 @@ from database import engine, SessionLocal
 import models
 
 import routers.menu.main
+import routers.submenu.main
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -17,4 +18,8 @@ def get_db():
 
 app = FastAPI()
 
-app.include_router(routers.menu.main.router, tags=['menu'])
+menu_router = routers.menu.main.router
+submenu_router = routers.submenu.main.router
+
+app.include_router(menu_router, tags=['menu'])
+app.include_router(submenu_router, tags=['submenu'])
