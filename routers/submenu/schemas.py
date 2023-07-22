@@ -13,3 +13,6 @@ class SubmenuForeignKey(SubmenuBase):
 
 class Submenu(SubmenuBase):
     id: UUID
+
+    class Config:
+        orm_mode = True
