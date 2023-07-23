@@ -23,7 +23,7 @@ CommonDep = Annotated[dict, Depends(common_params)]
 
 
 # Get list of all dishes
-# Code is designed to throw an error if parent menu and submenu doesn't exist, but test except an empty output and 200 statud code, so no dependencies in this route
+# Code is designed to throw an error if parent menu and submenu doesn't exist, but test expects an empty output and 200 statud code, so no dependencies in this route
 @router.get(f"{base_url}/", response_model=list[schemas.Dish])
 def read_dishes(commons: CommonDep, db: Session = Depends(get_db)):
     db_submenu = get_submenu_by_id(db, commons["submenu_id"])
