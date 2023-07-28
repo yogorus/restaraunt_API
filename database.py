@@ -3,18 +3,12 @@ from dotenv.main import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
-load_dotenv()
-# user = os.getenv("POSTGRES_USER")
-# password = os.getenv("POSTGRES_PASSWORD")
-# server_name = os.getenv("SERVER_NAME")
-# port = os.getenv("DB_PORT")
-# service = os.getenv("DB_SERVICE")
-# db_name = os.getenv("DB_NAME")
-url = os.getenv("DATABASE_URL")
+from config import DB_HOST, DB_NAME, DB_PORT, POSTGRES_USER, POSTGRES_PASSWORD
 
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@ylab_db:5432/db"
-SQLALCHEMY_DATABASE_URL = f"{url}"
+SQLALCHEMY_DATABASE_URL = (
+    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
