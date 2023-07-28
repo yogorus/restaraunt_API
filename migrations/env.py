@@ -18,8 +18,8 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 sys.path.append(".")
-import models
-from database import Base, SQLALCHEMY_DATABASE_URL
+import src.models
+from src.database import Base, SQLALCHEMY_DATABASE_URL
 
 config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 

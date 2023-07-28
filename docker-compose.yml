@@ -16,7 +16,7 @@ services:
     entrypoint: >
       sh -c "
         alembic upgrade head &&
-        uvicorn main:app --host 0.0.0.0 --reload
+        uvicorn src.main:app --host 0.0.0.0 --reload
       "
     ports:
       - "8000:8000"
@@ -24,7 +24,7 @@ services:
       - ylab_network
     depends_on:
       ylab_db:
-        condition: servive_healthy
+        condition: service_healthy
     # restart: always
 
   ylab_db:
@@ -34,9 +34,10 @@ services:
       POSTGRES_DB: "${DB_NAME}"
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PGUSER: "${PGUSER}"
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "db"]
+      test: ["CMD-SHELL", "pg_isready", "-U", "${PGUSER}", "-d", "${DB_NAME}"]
       interval: 10s
       timeout: 30s
       retries: 5

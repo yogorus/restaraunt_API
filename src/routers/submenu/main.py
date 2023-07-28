@@ -1,13 +1,11 @@
-import sys
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from uuid import UUID
 from . import crud, schemas
 
-sys.path.append("..")
-from database import get_db
-from routers.utils import check_menu_id, check_submenu_id
-from routers.menu.crud import get_menu_by_id
+from src.database import get_db
+from src.routers.utils import check_menu_id, check_submenu_id
+from src.routers.menu.crud import get_menu_by_id
 
 router = APIRouter(prefix=("/api/v1/menus"))
 

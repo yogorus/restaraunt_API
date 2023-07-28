@@ -1,10 +1,8 @@
-import sys
 from sqlalchemy.orm import Session
 from uuid import UUID
 from . import schemas
 
-sys.path.append("..")
-from models import Submenu, Menu
+from src.models import Submenu, Menu
 
 
 def get_submenus(db: Session, menu: Menu) -> list[Submenu]:
@@ -12,7 +10,7 @@ def get_submenus(db: Session, menu: Menu) -> list[Submenu]:
 
 
 def get_submenu_by_id(db: Session, id: UUID) -> Submenu:
-    return db.query(Submenu).filter(Submenu.id == id).first()
+    return db.query(Submenu).filter(Submenu.id == id).first()  # type: ignore
 
 
 def create_submenu(db: Session, menu_id: UUID, submenu: schemas.SubmenuBase) -> Submenu:

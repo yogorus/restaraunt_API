@@ -1,10 +1,8 @@
-import sys
 from sqlalchemy.orm import Session
 from uuid import UUID
 from . import schemas
 
-sys.path.append("..")
-from models import Submenu, Dish
+from src.models import Submenu, Dish
 
 
 def count_same_titles(db: Session, title: str) -> int:
@@ -23,7 +21,7 @@ def create_dish(db: Session, dish: schemas.DishBaseModel, submenu_id: UUID):
     return db_dish
 
 
-def get_dish_by_id(db: Session, dish_id: UUID):
+def get_dish_by_id(db: Session, dish_id: UUID) -> Dish | None:
     return db.query(Dish).filter(Dish.id == dish_id).first()
 
 

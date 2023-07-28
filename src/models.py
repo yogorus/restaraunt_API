@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
-from database import Base
+from .database import Base
 
 
 class Menu(Base):
