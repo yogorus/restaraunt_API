@@ -1,0 +1,58 @@
+version: "3.9"
+services:
+  fastapi-ylab:
+    container_name: ylab_api
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      - "DATABASE_URL:${DATABASE_URL}"
+
+    volumes:
+      - ./:/app
+
+    entrypoint: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn main:app --host 0.0.0.0 --reload
+      "
+    ports:
+      - "8000:8000"
+    networks:
+      - ylab_network
+    depends_on:
+      ylab_db:
+        condition: servive_healthy
+    # restart: always
+
+  ylab_db:
+    image: postgres:15.1-alpine
+    container_name: ylab_db
+    environment:
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "db"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 80s
+
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    networks:
+      - ylab_network
+
+networks:
+  ylab_network:
+    name: ylab_network
+# volumes:
+#   postgres_data:

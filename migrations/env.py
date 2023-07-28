@@ -19,7 +19,9 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 sys.path.append(".")
 import models
-from database import Base
+from database import Base, SQLALCHEMY_DATABASE_URL
+
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 
 target_metadata = Base.metadata
 # target_metadata = None
