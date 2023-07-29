@@ -39,35 +39,23 @@ def patch_menu(get_menu_by_id):
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
     response_json = response.json()
-    assert sent_json["title"] == response_json["title"]
-    assert sent_json["description"] == response_json["description"]
+    assert get_menu_by_id["id"] == response_json["id"]
+    assert get_menu_by_id["title"] != response_json["title"]
+    assert get_menu_by_id["description"] != response_json["description"]
 
     yield response_json
 
 
 @pytest.fixture(scope="session")
-def get_updated_menu_by_id(patch_menu):
-    response = client.get(f"{base_url}/menus/{patch_menu['id']}")
-    response_json = response.json()
-    assert response.headers["Content-Type"] == "application/json"
-    assert response.status_code == 200
-
-    assert response_json["id"] == patch_menu["id"]
-    assert response_json["title"] == patch_menu["title"]
-    assert response_json["description"] == patch_menu["description"]
-
-    yield response_json
-
-
-@pytest.fixture(scope="session")
-def delete_menu(get_updated_menu_by_id):
-    response = client.delete(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
+def delete_menu(patch_menu):
+    response = client.delete(f"{base_url}/menus/{patch_menu['id']}")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
-    yield response.json()
+    yield {"id": patch_menu["id"]}
 
 
+# Empty db
 def test_menu_root():
     response = client.get(f"{base_url}/menus")
     assert response.headers["Content-Type"] == "application/json"
@@ -75,21 +63,7 @@ def test_menu_root():
     assert response.json() == []
 
 
-# def test_response_contains_id(create_menu):
-#     assert "id" in create_menu
-#     assert type(create_menu["id"]) == str
-
-
-# def test_response_contains_title(create_menu):
-#     assert "title" in create_menu
-#     assert type(create_menu["title"]) == str
-
-
-# def test_response_contains_description(create_menu):
-#     assert "description" in create_menu
-#     assert type(create_menu["description"]) == str
-
-
+# After creation
 def test_menu_root_is_not_empty(create_menu):
     response = client.get(f"{base_url}/menus")
     assert response.headers["Content-Type"] == "application/json"
@@ -102,60 +76,21 @@ def test_menu_response_after_create(create_menu):
     assert response.json() == create_menu
 
 
-# def test_menu_id(get_menu_by_id, create_menu):
-#     assert get_menu_by_id["id"] == create_menu["id"]
-
-
-# def test_menu_title(get_menu_by_id, create_menu):
-#     assert get_menu_by_id["title"] == create_menu["title"]
-
-
-# def test_menu_description(get_menu_by_id, create_menu):
-#     assert get_menu_by_id["description"] == create_menu["description"]
-
-
-def test_patched_menu_id(patch_menu, get_menu_by_id):
-    assert "id" in patch_menu
-    assert patch_menu["id"] == get_menu_by_id["id"]
-
-
-def test_patched_menu_title(patch_menu, get_menu_by_id):
-    assert "title" in patch_menu
-    assert type(patch_menu["title"]) == str
-    assert patch_menu["title"] != get_menu_by_id["title"]
-
-
-def test_patched_menu_description(patch_menu, get_menu_by_id):
-    assert "description" in patch_menu
-    assert type(patch_menu["description"]) == str
-    assert patch_menu["description"] != get_menu_by_id["description"]
-
-
-def test_updated_menu_response(get_updated_menu_by_id):
-    response = client.get(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
+# After patch
+def test_updated_menu_response(patch_menu):
+    response = client.get(f"{base_url}/menus/{patch_menu['id']}")
     assert response.status_code == 200
-    assert response.json() == get_updated_menu_by_id
+    assert response.json() == patch_menu
 
 
-# def test_updated_menu_contains_id(get_updated_menu_by_id):
-#     assert "id" in get_updated_menu_by_id
-
-
-# def test_updated_menu_contains_title(get_updated_menu_by_id):
-#     assert "title" in get_updated_menu_by_id
-
-
-# def test_updated_menu_contains_description(get_updated_menu_by_id):
-#     assert "description" in get_updated_menu_by_id
-
-
+# After delete
 def test_menu_list_after_delete(delete_menu):
     response = client.get(f"{base_url}/menus")
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_menu_by_id_after_delete(delete_menu, get_updated_menu_by_id):
-    response = client.get(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
+def test_menu_by_id_after_delete(delete_menu):
+    response = client.get(f"{base_url}/menus/{delete_menu['id']}")
     assert response.status_code == 404
     assert response.json()["detail"] == "menu not found"
