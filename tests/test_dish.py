@@ -15,11 +15,13 @@ def create_dish(create_menu, create_submenu):
         json=sent_json,
     )
     response_json = response.json()
+
     assert response.status_code == 201
+
     assert "id" in response_json
-    assert "title" in response_json
-    assert "price" in response_json
-    assert "description" in response_json
+    assert sent_json["title"] == response_json["title"]
+    assert sent_json["description"] == response_json["description"]
+    assert sent_json["price"] == response_json["price"]
 
     yield response_json
 
@@ -42,6 +44,10 @@ def patch_dish(create_menu, create_submenu, create_dish):
     assert create_dish["title"] != response_json["title"]
     assert create_dish["price"] != response_json["price"]
     assert create_dish["description"] != response_json["description"]
+
+    assert sent_json["title"] == response_json["title"]
+    assert sent_json["description"] == response_json["description"]
+    assert sent_json["price"] == response_json["price"]
 
     yield response_json
 

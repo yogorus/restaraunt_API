@@ -34,53 +34,35 @@ def patch_submenu(create_menu, create_submenu):
     assert response.status_code == 200
 
     response_json = response.json()
+    assert create_submenu["id"] == create_submenu["id"]
+    assert create_submenu["title"] != response_json["title"]
+    assert create_submenu["description"] != response_json["description"]
+
     assert sent_json["title"] == response_json["title"]
     assert sent_json["description"] == response_json["description"]
-    assert response_json["id"] == create_submenu["id"]
 
     yield response_json
 
 
 @pytest.fixture(scope="session")
-def get_updated_submenu(create_menu, patch_submenu):
-    response = client.get(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{patch_submenu['id']}"
-    )
-    response_json = response.json()
-    assert response_json == patch_submenu
-
-    yield response_json
-
-
-@pytest.fixture(scope="session")
-def delete_submenu(create_menu, get_updated_submenu):
+def delete_submenu(create_menu, patch_submenu):
     response = client.delete(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{get_updated_submenu['id']}"
+        f"{base_url}/menus/{create_menu['id']}/submenus/{patch_submenu['id']}"
     )
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
-    yield response.json()
+    yield {"id": patch_submenu["id"]}
 
 
+# No submenus
 def test_emtpy_submenu_list(create_menu):
     response = client.get(f"{base_url}/menus/{create_menu['id']}/submenus")
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_submenu_contains_id(create_submenu):
-    assert "id" in create_submenu
-    assert type(create_submenu["id"]) == str
-
-
-# def test_submenu_contains_title(create_submenu):
-#     assert "title" in create_submenu
-#     assert type(create_submenu["title"]) == str
-
-# def test_submenu_contains_description()
-
-
+# After submenu is created
 def test_submenu_list_after_create(create_menu, create_submenu):
     response = client.get(f"{base_url}/menus/{create_menu['id']}/submenus")
     assert response.status_code == 200
@@ -95,38 +77,34 @@ def test_submenu_by_id_after_create(create_menu, create_submenu):
     assert response.json() == create_submenu
 
 
-def test_updated_submenu_by_title(create_submenu, patch_submenu):
-    assert create_submenu["title"] != patch_submenu["title"]
-
-
-def test_updated_submenu_by_description(create_submenu, patch_submenu):
-    assert create_submenu["description"] != patch_submenu["description"]
-
-
-def test_updated_submenu_by_response(create_menu, get_updated_submenu):
+# After update
+def test_updated_submenu_by_response(create_menu, patch_submenu):
     response = client.get(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{get_updated_submenu['id']}"
+        f"{base_url}/menus/{create_menu['id']}/submenus/{patch_submenu['id']}"
     )
     assert response.status_code == 200
-    assert response.json() == get_updated_submenu
+    assert response.json() == patch_submenu
 
 
+# After submenu is deleted
 def test_submenu_list_after_delete(delete_submenu, create_menu):
     response = client.get(f"{base_url}/menus/{create_menu['id']}/submenus/")
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_submenu_after_delete(delete_submenu, get_updated_submenu, create_menu):
+def test_submenu_by_id_after_delete(delete_submenu, create_menu):
     response = client.get(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{get_updated_submenu['id']}"
+        f"{base_url}/menus/{create_menu['id']}/submenus/{delete_submenu['id']}"
     )
     assert response.status_code == 404
     assert response.json() == {"detail": "submenu not found"}
 
 
+# Test menu list after menu is deleted
 def test_menu_list_after_menu_delete(create_menu):
     response = client.delete(f"{base_url}/menus/{create_menu['id']}")
+    assert response.status_code == 200
 
     response = client.get(f"{base_url}/menus")
 

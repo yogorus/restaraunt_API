@@ -38,10 +38,14 @@ def patch_menu(get_menu_by_id):
     response = client.patch(f"{base_url}/menus/{get_menu_by_id['id']}", json=sent_json)
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
+
     response_json = response.json()
     assert get_menu_by_id["id"] == response_json["id"]
     assert get_menu_by_id["title"] != response_json["title"]
     assert get_menu_by_id["description"] != response_json["description"]
+
+    assert sent_json["title"] == response_json["title"]
+    assert sent_json["description"] == response_json["description"]
 
     yield response_json
 
