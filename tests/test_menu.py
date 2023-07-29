@@ -144,27 +144,13 @@ def test_updated_menu_contains_description(get_updated_menu_by_id):
     assert "description" in get_updated_menu_by_id
 
 
-def test_menu_after_delete(get_updated_menu_by_id):
-    response = client.delete(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
-
-    response = client.get(f"{base_url}/menus/")
+def test_menu_list_after_delete(delete_menu):
+    response = client.get(f"{base_url}/menus")
     assert response.status_code == 200
     assert response.json() == []
 
+
+def test_menu_by_id_after_delete(delete_menu, get_updated_menu_by_id):
     response = client.get(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
     assert response.status_code == 404
-    assert response.json() == {"detail": "menu not found"}
-
-
-# def test_menu_list_after_delete(delete_menu):
-#     response = client.get(f"{base_url}/menus")
-#     assert response.status_code == 200
-#     assert response.json() == []
-
-
-# def test_menu_by_id_after_delete(delete_menu, get_updated_menu_by_id):
-#     response = client.get(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
-#     assert response.status_code == 404
-#     assert response.json()["detail"] == "menu not found"
+    assert response.json()["detail"] == "menu not found"
