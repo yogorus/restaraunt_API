@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  ylab_api_test:
+    container_name: ylab_api_test
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - ./:/app
+
+    entrypoint: >
+      sh -c "
+        pytest -vv -W
+      "
+    networks:
+      - ylab_network
+
+# test_db:
+#   container_name: test_db
+#   image: postgres:15.1-alpine
+#   environment:
+#     POSTGRES_DB: "${TEST_DB_NAME}"
+#     POSTGRES_USER: "${TEST_POSTGRES_USER}"
+#     POSTGRES_PASSWORD: "${TEST_POSTGRES_PASSWORD}"
+#     PGUSER: "${TEST_PGUSER}"
+#     PGPORT: 6000
+
+#   healthcheck:
+#     test:
+#       [
+#         "CMD-SHELL",
+#         "pg_isready",
+#         "-U",
+#         "${TEST_PGUSER}",
+#         "-d",
+#         "${TEST_DB_NAME}",
+#       ]
+#     interval: 10s
+#     timeout: 30s
+#     retries: 5
+#     start_period: 80s
+
+#   expose:
+#     - 6000
+#   ports:
+#     - "6000:6000"
+#   networks:
+#     - test_network
+
+networks:
+  ylab_network:
+    name: ylab_network
