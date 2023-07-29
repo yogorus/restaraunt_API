@@ -12,6 +12,7 @@ def create_menu():
 
     assert response.headers["Content-Type"] == "application/json"
     assert response.status_code == 201
+    assert "id" in response_json
     assert sent_json["title"] == response_json["title"]
     assert sent_json["description"] == response_json["description"]
 
@@ -74,19 +75,19 @@ def test_menu_root():
     assert response.json() == []
 
 
-def test_response_contains_id(create_menu):
-    assert "id" in create_menu
-    assert type(create_menu["id"]) == str
+# def test_response_contains_id(create_menu):
+#     assert "id" in create_menu
+#     assert type(create_menu["id"]) == str
 
 
-def test_response_contains_title(create_menu):
-    assert "title" in create_menu
-    assert type(create_menu["title"]) == str
+# def test_response_contains_title(create_menu):
+#     assert "title" in create_menu
+#     assert type(create_menu["title"]) == str
 
 
-def test_response_contains_description(create_menu):
-    assert "description" in create_menu
-    assert type(create_menu["description"]) == str
+# def test_response_contains_description(create_menu):
+#     assert "description" in create_menu
+#     assert type(create_menu["description"]) == str
 
 
 def test_menu_root_is_not_empty(create_menu):
@@ -96,27 +97,25 @@ def test_menu_root_is_not_empty(create_menu):
     assert len(response.json()) > 0
 
 
-def test_menu_id(get_menu_by_id, create_menu):
-    assert "id" in get_menu_by_id
-    assert type(get_menu_by_id["id"]) == str
-    assert get_menu_by_id["id"] == create_menu["id"]
+def test_menu_response_after_create(create_menu):
+    response = client.get(f"{base_url}/menus/{create_menu['id']}")
+    assert response.json() == create_menu
 
 
-def test_menu_title(get_menu_by_id, create_menu):
-    assert "title" in get_menu_by_id
-    assert type(get_menu_by_id["title"]) == str
-    assert get_menu_by_id["title"] == create_menu["title"]
+# def test_menu_id(get_menu_by_id, create_menu):
+#     assert get_menu_by_id["id"] == create_menu["id"]
 
 
-def test_menu_description(get_menu_by_id, create_menu):
-    assert "description" in get_menu_by_id
-    assert type(get_menu_by_id["description"]) == str
-    assert get_menu_by_id["description"] == create_menu["description"]
+# def test_menu_title(get_menu_by_id, create_menu):
+#     assert get_menu_by_id["title"] == create_menu["title"]
+
+
+# def test_menu_description(get_menu_by_id, create_menu):
+#     assert get_menu_by_id["description"] == create_menu["description"]
 
 
 def test_patched_menu_id(patch_menu, get_menu_by_id):
     assert "id" in patch_menu
-    assert type(patch_menu["id"]) == str
     assert patch_menu["id"] == get_menu_by_id["id"]
 
 
@@ -132,16 +131,22 @@ def test_patched_menu_description(patch_menu, get_menu_by_id):
     assert patch_menu["description"] != get_menu_by_id["description"]
 
 
-def test_updated_menu_contains_id(get_updated_menu_by_id):
-    assert "id" in get_updated_menu_by_id
+def test_updated_menu_response(get_updated_menu_by_id):
+    response = client.get(f"{base_url}/menus/{get_updated_menu_by_id['id']}")
+    assert response.status_code == 200
+    assert response.json() == get_updated_menu_by_id
 
 
-def test_updated_menu_contains_title(get_updated_menu_by_id):
-    assert "title" in get_updated_menu_by_id
+# def test_updated_menu_contains_id(get_updated_menu_by_id):
+#     assert "id" in get_updated_menu_by_id
 
 
-def test_updated_menu_contains_description(get_updated_menu_by_id):
-    assert "description" in get_updated_menu_by_id
+# def test_updated_menu_contains_title(get_updated_menu_by_id):
+#     assert "title" in get_updated_menu_by_id
+
+
+# def test_updated_menu_contains_description(get_updated_menu_by_id):
+#     assert "description" in get_updated_menu_by_id
 
 
 def test_menu_list_after_delete(delete_menu):

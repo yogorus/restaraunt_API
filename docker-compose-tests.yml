@@ -12,7 +12,7 @@ services:
 
     entrypoint: >
       sh -c "
-        pytest -vv -W
+        pytest -vv
       "
     networks:
       - ylab_network
