@@ -10,7 +10,7 @@ from src.main import app
 # DB
 # DATABASE_URL_TEST = f"sqlite:///"
 
-# TEST_SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@test_db:6000/db"
+# TEST_SQLALCHEMY_DATABASE_URL = "sqlite:///"
 
 # engine = create_engine(
 #     TEST_SQLALCHEMY_DATABASE_URL,
