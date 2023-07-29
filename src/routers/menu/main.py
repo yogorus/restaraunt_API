@@ -17,8 +17,8 @@ def read_menus(db: Session = Depends(get_db)):
     menus = [
         schemas.MenuOutput(
             **menu.__dict__,
-            submenus_count=menu.submenus_count(),
-            dishes_count=menu.dishes_count()
+            submenus_count=crud.count_children(db, menu)["submenus_count"],
+            dishes_count=crud.count_children(db, menu)["dishes_count"]
         )
         for menu in db_menus
     ]
