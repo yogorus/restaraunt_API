@@ -1,5 +1,5 @@
 import re
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, constr, field_validator, ConfigDict
 from uuid import UUID
 
 
@@ -8,15 +8,14 @@ class DishBaseModel(BaseModel):
     description: str
     price: constr(strip_whitespace=True)  # type: ignore
 
-    @validator("price")
+    @field_validator("price")
     def validate_price(cls, value):
         pattern = r"^(?!0[0-9])[0-9]+\.[0-9]{2}$"
         if not re.match(pattern, value):
             raise ValueError("invalid float number")
         return value
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Dish(DishBaseModel):

@@ -1,7 +1,7 @@
 import sys
 from dotenv.main import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 from .config import DB_HOST, DB_NAME, DB_PORT, POSTGRES_USER, POSTGRES_PASSWORD

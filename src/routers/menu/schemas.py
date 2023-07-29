@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 
@@ -11,8 +11,7 @@ class MenuBase(BaseModel):
 class Menu(MenuBase):
     id: UUID
 
-    class Confing:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MenuOutput(Menu):
