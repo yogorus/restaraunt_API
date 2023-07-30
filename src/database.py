@@ -31,7 +31,7 @@ class Base(DeclarativeBase):
 #     async with SessionLocal() as session:
 #         yield session
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with SessionLocal as db:  # type: ignore
+    async with SessionLocal as db:
         yield db
 
 
