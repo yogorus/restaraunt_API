@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from uuid import UUID
 from . import crud, schemas
+import asyncio
 
 from src.database import get_db
 from src.routers.utils import check_menu_id
@@ -12,11 +13,11 @@ router = APIRouter(prefix=("/api/v1/menus"))
 
 # List all menus
 @router.get("/")
-def read_menus(db: Session = Depends(get_db)):
-    db_menus = crud.get_menus(db)
+async def read_menus(db: Session = Depends(get_db)):
+    db_menus = await crud.get_menus(db)
     menus = []
     for db_menu in db_menus:
-        count_children = crud.count_children(db, db_menu)
+        count_children = await asyncio.gather(crud.count_children(db, db_menu))
         menus.append(
             schemas.MenuOutput(
                 **db_menu.__dict__,
