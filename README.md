@@ -1,8 +1,7 @@
-# База Данных
-
-В файле **alembic.ini** нужно поменять содержимое sqlalchemy.url на тот адрес и юзернейм/пароль, что стоят у вас.
-
-В файле **database.py** нужно сделать то же самое с переменной **SQLALCHEMY_DATABASE_URL**
 # Запуск
 
-Прописать в терминале 'uvicorn main:app'
+> **docker-compose up -d**
+
+# Тестирование
+
+> **docker-compose -f docker-compose-tests.yml up**
