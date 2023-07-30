@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from . import schemas
 
-from src.models import Submenu, Menu
+from src.models import Submenu, Menu, Dish
 
 
 def get_submenus(db: Session, menu: Menu) -> list[Submenu]:
@@ -39,4 +39,9 @@ def delete_submenu(db: Session, db_submenu: Submenu):
 
 def count_same_titles(db: Session, title: str) -> int:
     count = db.query(Submenu).filter(Submenu.title == title).count()
+    return count
+
+
+def count_dishes(db: Session, db_submenu: Submenu) -> int:
+    count = db.query(Dish).filter(Dish.submenu_id == db_submenu.id).count()
     return count

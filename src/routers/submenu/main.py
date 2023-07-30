@@ -17,7 +17,9 @@ def read_submenus(menu_id: UUID, db: Session = Depends(get_db)):
     db_submenus = crud.get_submenus(db, db_menu)
 
     submenus = [
-        schemas.SubmenuOutput(**submenu.__dict__, dishes_count=submenu.dishes_count())
+        schemas.SubmenuOutput(
+            **submenu.__dict__, dishes_count=crud.count_dishes(db, submenu)
+        )
         for submenu in db_submenus
     ]
     return submenus
@@ -37,7 +39,7 @@ def create_submenu(
 
     db_submenu = crud.create_submenu(db, menu_id, submenu)
     return schemas.SubmenuOutput(
-        **db_submenu.__dict__, dishes_count=db_submenu.dishes_count()
+        **db_submenu.__dict__, dishes_count=crud.count_dishes(db, db_submenu)
     )
 
 
@@ -49,7 +51,7 @@ def create_submenu(
 def read_submenu(menu_id: UUID, submenu_id: UUID, db: Session = Depends(get_db)):
     db_submenu = crud.get_submenu_by_id(db, submenu_id)
     return schemas.SubmenuOutput(
-        **db_submenu.__dict__, dishes_count=db_submenu.dishes_count()
+        **db_submenu.__dict__, dishes_count=crud.count_dishes(db, db_submenu)
     )
 
 
@@ -71,7 +73,7 @@ def update_submenu(
 
     db_submenu = crud.patch_submenu(db, submenu_data, db_submenu)
     return schemas.SubmenuOutput(
-        **db_submenu.__dict__, dishes_count=db_submenu.dishes_count()
+        **db_submenu.__dict__, dishes_count=crud.count_dishes(db, db_submenu)
     )
 
 

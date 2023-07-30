@@ -14,14 +14,16 @@ router = APIRouter(prefix=("/api/v1/menus"))
 @router.get("/")
 def read_menus(db: Session = Depends(get_db)):
     db_menus = crud.get_menus(db)
-    menus = [
-        schemas.MenuOutput(
-            **menu.__dict__,
-            submenus_count=crud.count_children(db, menu)["submenus_count"],
-            dishes_count=crud.count_children(db, menu)["dishes_count"]
+    menus = []
+    for db_menu in db_menus:
+        count_children = crud.count_children(db, db_menu)
+        menus.append(
+            schemas.MenuOutput(
+                **db_menu.__dict__,
+                submenus_count=count_children["submenus_count"],
+                dishes_count=count_children["dishes_count"]
+            )
         )
-        for menu in db_menus
-    ]
     return menus
 
 
@@ -30,10 +32,11 @@ def read_menus(db: Session = Depends(get_db)):
 def create_menu(menu: schemas.MenuBase, db: Session = Depends(get_db)):
     db_menu = crud.create_menu(db=db, menu=menu)
 
+    count_children = crud.count_children(db, db_menu)
     return schemas.MenuOutput(
         **db_menu.__dict__,
-        submenus_count=db_menu.submenus_count(),
-        dishes_count=db_menu.dishes_count()
+        submenus_count=count_children["submenus_count"],
+        dishes_count=count_children["dishes_count"]
     )
 
 
@@ -42,10 +45,11 @@ def create_menu(menu: schemas.MenuBase, db: Session = Depends(get_db)):
 def read_menu(menu_id: UUID, db: Session = Depends(get_db)):
     db_menu = crud.get_menu_by_id(db, menu_id)
 
+    count_children = crud.count_children(db, db_menu)
     return schemas.MenuOutput(
         **db_menu.__dict__,
-        submenus_count=db_menu.submenus_count(),
-        dishes_count=db_menu.dishes_count()
+        submenus_count=count_children["submenus_count"],
+        dishes_count=count_children["dishes_count"]
     )
 
 
@@ -66,8 +70,9 @@ def patch_menu(
     db_menu = crud.get_menu_by_id(db, menu_id)
     db_menu = crud.patch_menu(db, menu_data, db_menu)
 
+    count_children = crud.count_children(db, db_menu)
     return schemas.MenuOutput(
         **db_menu.__dict__,
-        submenus_count=db_menu.submenus_count(),
-        dishes_count=db_menu.dishes_count()
+        submenus_count=count_children["submenus_count"],
+        dishes_count=count_children["dishes_count"]
     )
