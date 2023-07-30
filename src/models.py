@@ -16,7 +16,11 @@ class Menu(Base):
     description = Column(String)
 
     submenus = relationship(
-        "Submenu", back_populates="menu", cascade="all,delete", passive_deletes=True
+        "Submenu",
+        back_populates="menu",
+        cascade="all,delete",
+        passive_deletes=True,
+        lazy="selectin",
     )
 
     def submenus_count(self) -> int:
@@ -39,9 +43,13 @@ class Submenu(Base):
     description = Column(String)
     menu_id = Column(UUID(as_uuid=True), ForeignKey("menus.id", ondelete="CASCADE"))
 
-    menu = relationship("Menu", back_populates="submenus")
+    menu = relationship("Menu", back_populates="submenus", lazy="selectin")
     dishes = relationship(
-        "Dish", back_populates="submenu", cascade="all,delete", passive_deletes=True
+        "Dish",
+        back_populates="submenu",
+        cascade="all,delete",
+        passive_deletes=True,
+        lazy="selectin",
     )
 
     def dishes_count(self) -> int:
@@ -61,7 +69,7 @@ class Dish(Base):
         UUID(as_uuid=True), ForeignKey("submenus.id", ondelete="CASCADE")
     )
 
-    submenu = relationship("Submenu", back_populates="dishes")
+    submenu = relationship("Submenu", back_populates="dishes", lazy="selectin")
 
     @validates("price")
     def validate_price(self, key, value):
