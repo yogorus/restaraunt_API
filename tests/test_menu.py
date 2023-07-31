@@ -1,13 +1,18 @@
 import pytest
-from tests.conftest import client
+import pytest_asyncio
+import asyncio
+from httpx import AsyncClient
+
+# from tests.conftest import client
 
 base_url = "http://localhost/api/v1"
+pytest_plugins = ("pytest_asyncio",)
 
 
-@pytest.fixture(scope="session")
-def create_menu():
+@pytest_asyncio.fixture(scope="session")
+async def create_menu(client: AsyncClient):
     sent_json = {"title": "My menu 1", "description": "My menu description 1"}
-    response = client.post(f"{base_url}/menus", json=sent_json)
+    response = await client.post(f"/menus/", json=sent_json)
     response_json = response.json()
 
     assert response.headers["Content-Type"] == "application/json"
@@ -20,8 +25,8 @@ def create_menu():
 
 
 @pytest.fixture(scope="session")
-def get_menu_by_id(create_menu):
-    response = client.get(f"{base_url}/menus/{create_menu['id']}")
+async def get_menu_by_id(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/{create_menu['id']}/")
     response_json = response.json()
     assert response.headers["Content-Type"] == "application/json"
     assert response.status_code == 200
@@ -30,12 +35,12 @@ def get_menu_by_id(create_menu):
 
 
 @pytest.fixture(scope="session")
-def patch_menu(get_menu_by_id):
+async def patch_menu(client: AsyncClient, get_menu_by_id):
     sent_json = {
         "title": "My updated menu 1",
         "description": "My updated menu description 1",
     }
-    response = client.patch(f"{base_url}/menus/{get_menu_by_id['id']}", json=sent_json)
+    response = await client.patch(f"/menus/{get_menu_by_id['id']}/", json=sent_json)
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
@@ -51,8 +56,8 @@ def patch_menu(get_menu_by_id):
 
 
 @pytest.fixture(scope="session")
-def delete_menu(patch_menu):
-    response = client.delete(f"{base_url}/menus/{patch_menu['id']}")
+async def delete_menu(client: AsyncClient, patch_menu):
+    response = await client.delete(f"/menus/{patch_menu['id']}/")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
@@ -60,41 +65,46 @@ def delete_menu(patch_menu):
 
 
 # Empty db
-def test_menu_root():
-    response = client.get(f"{base_url}/menus")
+@pytest.mark.asyncio
+async def test_menu_root(
+    client: AsyncClient,
+):
+    response = await client.get(f"/menus/")
     assert response.headers["Content-Type"] == "application/json"
     assert response.status_code == 200
     assert response.json() == []
 
 
 # After creation
-def test_menu_root_is_not_empty(create_menu):
-    response = client.get(f"{base_url}/menus")
+@pytest.mark.asyncio
+async def test_menu_root_is_not_empty(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/")
     assert response.headers["Content-Type"] == "application/json"
     assert response.status_code == 200
     assert len(response.json()) > 0
 
 
-def test_menu_response_after_create(create_menu):
-    response = client.get(f"{base_url}/menus/{create_menu['id']}")
-    assert response.json() == create_menu
+async def test_menu_response_after_create(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/{create_menu['id']}/")
+    response_json = response.json()
+    assert response_json == create_menu
 
 
 # After patch
-def test_updated_menu_response(patch_menu):
-    response = client.get(f"{base_url}/menus/{patch_menu['id']}")
+async def test_updated_menu_response(client: AsyncClient, patch_menu):
+    response = await client.get(f"/menus/{patch_menu['id']}/")
     assert response.status_code == 200
     assert response.json() == patch_menu
 
 
 # After delete
-def test_menu_list_after_delete(delete_menu):
-    response = client.get(f"{base_url}/menus")
+async def test_menu_list_after_delete(client: AsyncClient, delete_menu):
+    response = await client.get(f"/menus/")
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_menu_by_id_after_delete(delete_menu):
-    response = client.get(f"{base_url}/menus/{delete_menu['id']}")
+async def test_menu_by_id_after_delete(client: AsyncClient, delete_menu):
+    response = await client.get(f"/menus/{delete_menu['id']}/")
     assert response.status_code == 404
     assert response.json()["detail"] == "menu not found"
