@@ -34,13 +34,13 @@ async def create_menu(db: AsyncSession, menu: schemas.MenuBase):
     return db_menu
 
 
-# def patch_menu(db: Session, data: schemas.MenuBase, db_menu: Menu) -> Menu:
-#     db_menu = db_menu
-#     db_menu.title = data.title  # type: ignore
-#     db_menu.description = data.description  # type: ignore
-#     db.commit()
-#     db.refresh(db_menu)
-#     return db_menu
+async def patch_menu(db: AsyncSession, data: schemas.MenuBase, db_menu: Menu) -> Menu:
+    db_menu = db_menu
+    db_menu.title = data.title  # type: ignore
+    db_menu.description = data.description  # type: ignore
+    await db.commit()
+    await db.refresh(db_menu)
+    return db_menu
 
 
 async def delete_menu(db: AsyncSession, db_menu: Menu):

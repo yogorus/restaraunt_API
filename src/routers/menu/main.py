@@ -1,9 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
-from uuid import UUID
 from . import crud, schemas
-import asyncio
 
 from src.models import Menu
 from src.database import get_db
@@ -67,17 +65,18 @@ async def delete_menu(
     return {"status": True, "message": "The menu has been deleted"}
 
 
-# # Patch menu by id
-# @router.patch("/{menu_id}", dependencies=[Depends(check_menu_id)])
-# def patch_menu(
-#     menu_id: UUID, menu_data: schemas.MenuBase, db: AsyncSession = Depends(get_db)
-# ):
-#     db_menu = crud.get_menu_by_id(db, menu_id)
-#     db_menu = crud.patch_menu(db, menu_data, db_menu)
+# Patch menu by id
+@router.patch("/{menu_id}")
+async def patch_menu(
+    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
+    menu_data: schemas.MenuBase,
+    db: AsyncSession = Depends(get_db),
+):
+    db_menu = await crud.patch_menu(db, menu_data, db_menu)
 
-#     count_children = crud.count_children(db, db_menu)
-#     return schemas.MenuOutput(
-#         **db_menu.__dict__,
-#         submenus_count=count_children["submenus_count"],
-#         dishes_count=count_children["dishes_count"],
-#     )
+    count_children = await crud.count_children(db, db_menu)
+    return schemas.MenuOutput(
+        **db_menu.__dict__,
+        submenus_count=count_children["submenus_count"],
+        dishes_count=count_children["dishes_count"],
+    )
