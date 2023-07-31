@@ -57,7 +57,7 @@ def event_loop(request):
 
 @pytest_asyncio.fixture(scope="session")
 async def client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(app=app, base_url="http://localhost/api/v1") as client:
+    async with AsyncClient(app=app, base_url="http://localhost:8000/api/v1") as client:
         yield client
 
 
