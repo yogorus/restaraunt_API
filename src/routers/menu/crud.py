@@ -25,11 +25,11 @@ async def get_menu_by_id(db: AsyncSession, id: UUID) -> Menu | None:
 
 
 async def create_menu(db: AsyncSession, menu: schemas.MenuBase):
+    # query = insert(Menu).values(**menu.model_dump())
+    # db_menu: Menu = await db.execute(query)
     db_menu = Menu(**menu.model_dump())
     db.add(db_menu)
     await db.commit()
-    # query = insert(Menu).values(**menu.model_dump())
-    # db_menu: Menu = await db.execute(query)
     await db.refresh(db_menu)
     return db_menu
 

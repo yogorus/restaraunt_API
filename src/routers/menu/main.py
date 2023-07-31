@@ -45,16 +45,16 @@ async def create_menu(menu: schemas.MenuBase, db: AsyncSession = Depends(get_db)
 
 # Get menu by id
 @router.get("/{menu_id}")
-async def read_menu(db_menu: Annotated[Menu, Depends(return_menu_or_404)]):
-    return db_menu
-
-
-#     count_children = crud.count_children(db, db_menu)
-#     return schemas.MenuOutput(
-#         **db_menu.__dict__,
-#         submenus_count=count_children["submenus_count"],
-#         dishes_count=count_children["dishes_count"],
-#     )
+async def read_menu(
+    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
+    db: AsyncSession = Depends(get_db),
+):
+    count_children = await crud.count_children(db, db_menu)
+    return schemas.MenuOutput(
+        **db_menu.__dict__,
+        submenus_count=count_children["submenus_count"],
+        dishes_count=count_children["dishes_count"],
+    )
 
 
 # # Delete menu by id

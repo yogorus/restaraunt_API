@@ -21,7 +21,7 @@ async def return_menu_or_404(
     db_menu = await get_menu_by_id(db, menu_id)
     if not db_menu:
         raise HTTPException(status_code=404, detail="menu not found")
-    return {"db_menu": db_menu}
+    return db_menu
 
 
 # async def check_menu_id(menu_id: UUID, db: AsyncSession = Depends(get_db)):
