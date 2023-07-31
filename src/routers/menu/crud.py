@@ -43,9 +43,9 @@ async def create_menu(db: AsyncSession, menu: schemas.MenuBase):
 #     return db_menu
 
 
-# def delete_menu(db: Session, db_menu: Menu):
-#     db.delete(db_menu)
-#     db.commit()
+async def delete_menu(db: AsyncSession, db_menu: Menu):
+    await db.delete(db_menu)
+    await db.commit()
 
 
 async def count_children(db: AsyncSession, db_menu: Menu) -> dict:

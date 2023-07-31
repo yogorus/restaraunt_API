@@ -57,13 +57,14 @@ async def read_menu(
     )
 
 
-# # Delete menu by id
-# @router.delete("/{menu_id}", dependencies=[Depends(check_menu_id)])
-# def delete_menu(menu_id: UUID, db: AsyncSession = Depends(get_db)):
-#     db_menu = crud.get_menu_by_id(db, menu_id)
-
-#     crud.delete_menu(db, db_menu)
-#     return {"status": True, "message": "The menu has been deleted"}
+# Delete menu by id
+@router.delete("/{menu_id}")
+async def delete_menu(
+    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
+    db: AsyncSession = Depends(get_db),
+):
+    await crud.delete_menu(db, db_menu)
+    return {"status": True, "message": "The menu has been deleted"}
 
 
 # # Patch menu by id
