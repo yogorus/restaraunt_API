@@ -1,10 +1,10 @@
 import pytest
-from tests.conftest import client
+from httpx import AsyncClient
 from tests.test_dish import create_menu, create_submenu, base_url
 
 
 # Create dishes
-def test_create_2_dishes(create_menu, create_submenu):
+async def test_create_2_dishes(client: AsyncClient, create_menu, create_submenu):
     data = (
         {
             "title": "My dish 1",
@@ -19,8 +19,8 @@ def test_create_2_dishes(create_menu, create_submenu):
     )
 
     for json in data:
-        response = client.post(
-            f"{base_url}/menus/{create_menu['id']}/submenus/{create_submenu['id']}/dishes",
+        response = await client.post(
+            f"/menus/{create_menu['id']}/submenus/{create_submenu['id']}/dishes/",
             json=json,
         )
         response_json = response.json()
@@ -31,8 +31,8 @@ def test_create_2_dishes(create_menu, create_submenu):
 
 
 # Test menu by id
-def test_get_menu_by_id(create_menu):
-    response = client.get(f"{base_url}/menus/{create_menu['id']}")
+async def test_get_menu_by_id(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/{create_menu['id']}")
     response_json = response.json()
 
     assert response.status_code == 200
@@ -42,9 +42,9 @@ def test_get_menu_by_id(create_menu):
 
 
 # Test submenu by id
-def test_get_submenu_by_id(create_menu, create_submenu):
-    response = client.get(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{create_submenu['id']}"
+async def test_get_submenu_by_id(client: AsyncClient, create_menu, create_submenu):
+    response = await client.get(
+        f"/menus/{create_menu['id']}/submenus/{create_submenu['id']}"
     )
     response_json = response.json()
     assert response.status_code == 200
@@ -53,32 +53,34 @@ def test_get_submenu_by_id(create_menu, create_submenu):
 
 
 # Test delete submenu
-def test_delete_submenu_by_id(create_menu, create_submenu):
-    response = client.delete(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{create_submenu['id']}"
+async def test_delete_submenu_by_id(client: AsyncClient, create_menu, create_submenu):
+    response = await client.delete(
+        f"/menus/{create_menu['id']}/submenus/{create_submenu['id']}"
     )
     assert response.status_code == 200
 
 
 # Test empty submenu list after submenu deletion
-def test_submenu_list_after_delete(create_menu):
-    response = client.get(f"{base_url}/menus/{create_menu['id']}/submenus/")
+async def test_submenu_list_after_delete(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/{create_menu['id']}/submenus/")
     assert response.status_code == 200
     assert response.json() == []
 
 
 # Test dish list after submenu deletion
-def test_dish_list_after_submenu_deletion(create_menu, create_submenu):
-    response = client.get(
-        f"{base_url}/menus/{create_menu['id']}/submenus/{create_submenu['id']}/dishes"
+async def test_dish_list_after_submenu_deletion(
+    client: AsyncClient, create_menu, create_submenu
+):
+    response = await client.get(
+        f"/menus/{create_menu['id']}/submenus/{create_submenu['id']}/dishes/"
     )
     assert response.status_code == 200
     assert response.json() == []
 
 
 # Test menu when all children are deleted
-def test_get_menu_with_no_children(create_menu):
-    response = client.get(f"{base_url}/menus/{create_menu['id']}")
+async def test_get_menu_with_no_children(client: AsyncClient, create_menu):
+    response = await client.get(f"/menus/{create_menu['id']}")
     response_json = response.json()
 
     assert response.status_code == 200
@@ -88,13 +90,15 @@ def test_get_menu_with_no_children(create_menu):
 
 
 # Delete menu
-def test_delete_menu(create_menu):
-    response = client.delete(f"{base_url}/menus/{create_menu['id']}")
+async def test_delete_menu(client: AsyncClient, create_menu):
+    response = await client.delete(f"/menus/{create_menu['id']}")
     assert response.status_code == 200
 
 
 # Test if menus are empty
-def test_menu_after_delete():
-    response = client.get(f"{base_url}/menus/")
+async def test_menu_after_delete(
+    client: AsyncClient,
+):
+    response = await client.get(f"{base_url}/menus/")
     assert response.status_code == 200
     assert response.json() == []
