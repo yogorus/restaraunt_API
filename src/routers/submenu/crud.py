@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, Column
+from sqlalchemy import select, func
 from uuid import UUID
 from . import schemas
 
@@ -15,7 +15,6 @@ async def get_submenu_by_id(db: AsyncSession, id: UUID) -> Submenu | None:
     result = await db.execute(query)
     result = result.scalar()
     return result
-    # return db.query(Submenu).filter(Submenu.id == id).first()  # type: ignore
 
 
 async def create_submenu(
@@ -52,7 +51,6 @@ async def count_same_titles(db: AsyncSession, title: str) -> int:
     row = result.first()
     if row:
         return row.title_count
-    # count = db.query(Submenu).filter(Submenu.title == title).count()
     return 0
 
 
@@ -68,5 +66,3 @@ async def count_dishes(db: AsyncSession, db_submenu: Submenu) -> int:
     if row:
         return row.dishes_count
     return 0
-    # count = db.query(Dish).filter(Dish.submenu_id == db_submenu.id).count()
-    # return count

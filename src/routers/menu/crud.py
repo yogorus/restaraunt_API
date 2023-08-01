@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.expression import select
-from sqlalchemy import func, select, insert
+from sqlalchemy import func, select, insert, distinct
 from fastapi.encoders import jsonable_encoder
 from uuid import UUID
 from . import schemas
@@ -48,11 +48,10 @@ async def delete_menu(db: AsyncSession, db_menu: Menu):
     await db.commit()
 
 
-async def count_children(db: AsyncSession, db_menu: Menu) -> dict:
+async def count_children(db: AsyncSession, db_menu: Menu) -> dict[str, int]:
     query = (
         select(
-            Menu.title,
-            func.count(Submenu.id).label("submenus_count"),
+            func.count(distinct(Submenu.id)).label("submenus_count"),
             func.count(Dish.id).label("dishes_count"),
         )
         .select_from(Menu)
