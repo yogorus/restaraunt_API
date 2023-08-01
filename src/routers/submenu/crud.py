@@ -58,7 +58,7 @@ async def count_same_titles(db: AsyncSession, title: str) -> int:
 
 async def count_dishes(db: AsyncSession, db_submenu: Submenu) -> int:
     query = (
-        select(func.count().label("dishes_count"))
+        select(func.count(Dish.id).label("dishes_count"))
         .select_from(Submenu)
         .join(Dish, Dish.submenu_id == Submenu.id, isouter=True)
         .filter(Submenu.id == db_submenu.id)
