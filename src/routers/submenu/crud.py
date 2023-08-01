@@ -1,47 +1,72 @@
-# from sqlalchemy.orm import Session
-# from uuid import UUID
-# from . import schemas
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func, Column
+from uuid import UUID
+from . import schemas
 
-# from src.models import Submenu, Menu, Dish
-
-
-# def get_submenus(db: Session, menu: Menu) -> list[Submenu]:
-#     return menu.submenus
+from src.models import Submenu, Menu, Dish
 
 
-# def get_submenu_by_id(db: Session, id: UUID) -> Submenu:
-#     return db.query(Submenu).filter(Submenu.id == id).first()  # type: ignore
+async def get_submenus(db: AsyncSession, db_menu: Menu) -> list[Submenu]:
+    return db_menu.submenus
 
 
-# def create_submenu(db: Session, menu_id: UUID, submenu: schemas.SubmenuBase) -> Submenu:
-#     new_submenu = schemas.SubmenuForeignKey(**submenu.model_dump(), menu_id=menu_id)
-#     db_submenu = Submenu(**new_submenu.model_dump())
-#     db.add(db_submenu)
-#     db.commit()
-#     db.refresh(db_submenu)
-#     return db_submenu
+async def get_submenu_by_id(db: AsyncSession, id: UUID) -> Submenu | None:
+    query = select(Submenu).filter(Submenu.id == id)
+    result = await db.execute(query)
+    result = result.scalar()
+    return result
+    # return db.query(Submenu).filter(Submenu.id == id).first()  # type: ignore
 
 
-# def patch_submenu(
-#     db: Session, data: schemas.SubmenuBase, db_submenu: Submenu
-# ) -> Submenu:
-#     db_submenu.title = data.title  # type: ignore
-#     db_submenu.description = data.description  # type: ignore
-#     db.commit()
-#     db.refresh(db_submenu)
-#     return db_submenu
+async def create_submenu(
+    db: AsyncSession, menu_id: UUID, submenu: schemas.SubmenuBase
+) -> Submenu:
+    new_submenu = schemas.SubmenuForeignKey(**submenu.model_dump(), menu_id=menu_id)
+    db_submenu = Submenu(**new_submenu.model_dump())
+    db.add(db_submenu)
+    await db.commit()
+    await db.refresh(db_submenu)
+    return db_submenu
 
 
-# def delete_submenu(db: Session, db_submenu: Submenu):
-#     db.delete(db_submenu)
-#     db.commit()
+async def patch_submenu(
+    db: AsyncSession, data: schemas.SubmenuBase, db_submenu: Submenu
+) -> Submenu:
+    db_submenu.title = data.title  # type: ignore
+    db_submenu.description = data.description  # type: ignore
+    await db.commit()
+    await db.refresh(db_submenu)
+    return db_submenu
 
 
-# def count_same_titles(db: Session, title: str) -> int:
-#     count = db.query(Submenu).filter(Submenu.title == title).count()
-#     return count
+async def delete_submenu(db: AsyncSession, db_submenu: Submenu):
+    await db.delete(db_submenu)
+    await db.commit()
 
 
-# def count_dishes(db: Session, db_submenu: Submenu) -> int:
-#     count = db.query(Dish).filter(Dish.submenu_id == db_submenu.id).count()
-#     return count
+async def count_same_titles(db: AsyncSession, title: str) -> int:
+    query = select(func.count(Submenu.title).label("title_count")).filter(
+        Submenu.title == title
+    )
+    result = await db.execute(query)
+    row = result.first()
+    if row:
+        return row.title_count
+    # count = db.query(Submenu).filter(Submenu.title == title).count()
+    return 0
+
+
+async def count_dishes(db: AsyncSession, db_submenu: Submenu) -> int:
+    query = (
+        select(func.count().label("dishes_count"))
+        .select_from(Submenu)
+        .join(Dish, Dish.submenu_id == Submenu.id, isouter=True)
+        .filter(Submenu.id == db_submenu.id)
+    )
+    result = await db.execute(query)
+    row = result.first()
+    if row:
+        return row.dishes_count
+    return 0
+    # count = db.query(Dish).filter(Dish.submenu_id == db_submenu.id).count()
+    # return count

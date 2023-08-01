@@ -5,7 +5,8 @@ from fastapi import HTTPException, Depends
 from .menu.crud import get_menu_by_id
 from src.models import Menu
 
-# from .submenu.crud import get_submenu_by_id
+from .submenu.crud import get_submenu_by_id
+
 # from .dish.crud import get_dish_by_id
 
 from src.database import get_db
@@ -22,6 +23,17 @@ async def return_menu_or_404(
     if not db_menu:
         raise HTTPException(status_code=404, detail="menu not found")
     return db_menu
+
+
+async def return_submenu_or_404(
+    submenu_id: UUID,
+    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
+    db: AsyncSession = Depends(get_db),
+):
+    db_submenu = await get_submenu_by_id(db, submenu_id)
+    if not db_submenu:
+        raise HTTPException(status_code=404, detail="submenu not found")
+    return db_submenu
 
 
 # async def check_menu_id(menu_id: UUID, db: AsyncSession = Depends(get_db)):

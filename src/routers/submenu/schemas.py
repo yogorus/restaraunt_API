@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+from sqlalchemy import Column
 from uuid import UUID
 
 
