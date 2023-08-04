@@ -1,82 +1,49 @@
+"""Main Menu Router"""
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Annotated
-from . import crud, schemas
 
-from src.models import Menu
-from src.database import get_db
-from src.routers.utils import return_menu_or_404
+from src.schemas import menu_schemas
+from src.services.menu.menu_service import MenuService
+
+router = APIRouter(prefix='/api/v1/menus')
 
 
-router = APIRouter(prefix=("/api/v1/menus"))
-
-
-# List all menus
-@router.get("/")
-async def read_menus(db: AsyncSession = Depends(get_db)):
-    db_menus = await crud.get_menus(db)
-    menus = []
-    for db_menu in db_menus:
-        count_children = await crud.count_children(db, db_menu)
-        menus.append(
-            schemas.MenuOutput(
-                **db_menu.__dict__,
-                submenus_count=count_children["submenus_count"],
-                dishes_count=count_children["dishes_count"],
-            )
-        )
-    return menus
+# Get all menus
+@router.get(
+    '/',
+    response_model=list[menu_schemas.MenuOutput],
+)
+async def read_menus(menu: MenuService = Depends()):
+    """Return json list of menus"""
+    return await menu.get_list(count_children=True)
 
 
 # Create Menu
-@router.post("/", status_code=201)
-async def create_menu(menu: schemas.MenuBase, db: AsyncSession = Depends(get_db)):
-    db_menu = await crud.create_menu(db, menu)
-
-    count_children = await crud.count_children(db, db_menu)
-    return schemas.MenuOutput(
-        **db_menu.__dict__,
-        submenus_count=count_children["submenus_count"],
-        dishes_count=count_children["dishes_count"],
-    )
+@router.post('/', status_code=201, response_model=menu_schemas.MenuOutput)
+async def create_menu(menu_data: menu_schemas.MenuBase, menu: MenuService = Depends()):
+    """Create Menu and return JSON"""
+    return await menu.create_menu(menu_data, count_children=True)
 
 
-# Get menu by id
-@router.get("/{menu_id}")
-async def read_menu(
-    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
-    db: AsyncSession = Depends(get_db),
-):
-    count_children = await crud.count_children(db, db_menu)
-    return schemas.MenuOutput(
-        **db_menu.__dict__,
-        submenus_count=count_children["submenus_count"],
-        dishes_count=count_children["dishes_count"],
-    )
+# Get Menu by id
+@router.get('/{menu_id}', response_model=menu_schemas.MenuOutput)
+async def read_menu(menu_id: UUID, menu: MenuService = Depends()):
+    """Return JSON of single menu"""
+    return await menu.get_menu(count_children=True, id=menu_id)
 
 
 # Delete menu by id
-@router.delete("/{menu_id}")
-async def delete_menu(
-    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
-    db: AsyncSession = Depends(get_db),
-):
-    await crud.delete_menu(db, db_menu)
-    return {"status": True, "message": "The menu has been deleted"}
+@router.delete('/{menu_id}')
+async def delete_menu(menu_id: UUID, menu: MenuService = Depends()):
+    """Delete menu and return json"""
+    return await menu.delete_menu(id=menu_id)
 
 
 # Patch menu by id
-@router.patch("/{menu_id}")
+@router.patch('/{menu_id}', response_model=menu_schemas.MenuOutput)
 async def patch_menu(
-    db_menu: Annotated[Menu, Depends(return_menu_or_404)],
-    menu_data: schemas.MenuBase,
-    db: AsyncSession = Depends(get_db),
+    menu_id: UUID, menu_data: menu_schemas.MenuBase, menu: MenuService = Depends()
 ):
-    db_menu = await crud.patch_menu(db, menu_data, db_menu)
-
-    count_children = await crud.count_children(db, db_menu)
-    return schemas.MenuOutput(
-        **db_menu.__dict__,
-        submenus_count=count_children["submenus_count"],
-        dishes_count=count_children["dishes_count"],
-    )
+    """Update existing Menu and return JSON"""
+    return await menu.patch_menu(menu_data, count_children=True, id=menu_id)

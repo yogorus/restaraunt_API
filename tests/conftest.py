@@ -1,14 +1,11 @@
+"""Config for pytest"""
 import asyncio
+from typing import AsyncGenerator
+
 import pytest
 import pytest_asyncio
-from typing import AsyncGenerator
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
-from src.database import get_db, Base
 from src.main import app
 
 # DB
@@ -47,7 +44,7 @@ from src.main import app
 #         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def event_loop(request):
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -55,9 +52,9 @@ def event_loop(request):
     loop.close()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope='session')
 async def client() -> AsyncGenerator[AsyncClient, None]:
-    async with AsyncClient(app=app, base_url="http://localhost:8000/api/v1") as client:
+    async with AsyncClient(app=app, base_url='http://localhost:8000/api/v1') as client:
         yield client
 
 
