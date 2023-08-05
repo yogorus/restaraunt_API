@@ -16,7 +16,7 @@ router = APIRouter(prefix='/api/v1/menus')
 )
 async def read_menus(menu: MenuService = Depends()):
     """Return json list of menus"""
-    return await menu.get_list(count_children=True)
+    return await menu.get_menus(count_children=True)
 
 
 # Create Menu
@@ -37,7 +37,7 @@ async def read_menu(menu_id: UUID, menu: MenuService = Depends()):
 @router.delete('/{menu_id}')
 async def delete_menu(menu_id: UUID, menu: MenuService = Depends()):
     """Delete menu and return json"""
-    return await menu.delete_menu(id=menu_id)
+    return await menu.delete_obj(id=menu_id)
 
 
 # Patch menu by id
@@ -46,4 +46,4 @@ async def patch_menu(
     menu_id: UUID, menu_data: menu_schemas.MenuBase, menu: MenuService = Depends()
 ):
     """Update existing Menu and return JSON"""
-    return await menu.patch_menu(menu_data, count_children=True, id=menu_id)
+    return await menu.update_menu(menu_data, count_children=True, id=menu_id)

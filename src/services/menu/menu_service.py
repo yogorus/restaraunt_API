@@ -2,16 +2,18 @@
 from fastapi import Depends
 
 from src.schemas import menu_schemas
+from src.services.base.base_service import BaseService
 from src.services.menu.menu_repository import MenuCRUDRepository
 
 
-class MenuService:
-    """Service designed to return dicts and then pass them to pydantic"""
+class MenuService(BaseService):
+    """Menu service converting db to dict"""
 
     def __init__(self, database_repository: MenuCRUDRepository = Depends()) -> None:
-        self.database_repository = database_repository
+        super().__init__(database_repository)
+        self.database_repository: MenuCRUDRepository = database_repository
 
-    async def add_count_children(self, **data) -> dict:
+    async def add_count_children(self, **data) -> dict[str, int]:
         """func to count children"""
 
         count = await self.database_repository.count_children(menu_id=data['id'])
@@ -21,63 +23,43 @@ class MenuService:
 
         return data
 
-    async def get_list(self, count_children: bool = False) -> list[dict]:
-        """return list of menus"""
-
-        menus = await self.database_repository.get_list()
-        data_list = []
-        for menu in menus:
-            data = {**menu.__dict__}
-
-            if count_children:
-                data = await self.add_count_children(**data)
-
-            data_list.append(data)
-
-        return data_list
-
-    async def get_menu(
-        self,
-        count_children: bool = False,
-        **kwargs,
-    ) -> dict:
-        """Get single menu"""
-        menu = await self.database_repository.get_menu(**kwargs)
-        data = {**menu.__dict__}
+    async def get_menus(self, count_children: bool = False) -> list[dict]:
+        """Get list of menus"""
+        menus = await super().get_list()
 
         if count_children:
-            data = await self.add_count_children(**data)
+            for menu in menus:
+                menu = await self.add_count_children(**menu)
 
-        return data
+        return menus
+
+    async def get_menu(self, count_children: bool = False, **kwargs) -> dict:
+        """Get single menu"""
+        menu = await super().get_one(**kwargs)
+
+        if count_children:
+            menu = await self.add_count_children(**menu)
+
+        return menu
 
     async def create_menu(
-        self,
-        menu_data: menu_schemas.MenuBase,
-        count_children: bool = False,
+        self, menu_data: menu_schemas.MenuBase, count_children: bool = False
     ) -> dict:
-        """Create menu"""
-        menu = await self.database_repository.create_menu(menu_data)
-        data = {**menu.__dict__}
+        """Create menu and return dict"""
+        menu = await super().create_obj(menu_data)
 
         if count_children:
-            data = await self.add_count_children(**data)
+            menu = await self.add_count_children(**menu)
 
-        return data
+        return menu
 
-    async def patch_menu(
+    async def update_menu(
         self, menu_data: menu_schemas.MenuBase, count_children: bool = False, **kwargs
     ) -> dict:
-        """Update menu by passed data"""
-        menu = await self.database_repository.patch_menu(menu_data, **kwargs)
-
-        data = {**menu.__dict__}
+        """Update menu and return dict"""
+        menu = await super().update_obj(menu_data, **kwargs)
 
         if count_children:
-            data = await self.add_count_children(**data)
+            menu = await self.add_count_children(**menu)
 
-        return data
-
-    async def delete_menu(self, **kwargs) -> dict:
-        """Delete menu and return message"""
-        await self.database_repository.delete_menu(**kwargs)
-        return {'status': True, 'message': 'The menu has been deleted'}
+        return menu
