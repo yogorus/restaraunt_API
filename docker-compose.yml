@@ -25,6 +25,8 @@ services:
     depends_on:
       ylab_db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     # restart: always
 
   redis:
@@ -41,6 +43,8 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
+    networks:
+      - ylab_network
 
   ylab_db:
     image: postgres:15.1-alpine
