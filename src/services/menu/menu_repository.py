@@ -14,7 +14,6 @@ class MenuCRUDRepository(BaseCRUDRepository):
     """CRUD layer for menu"""
 
     def __init__(self, session: AsyncSession = Depends(get_db)) -> None:
-        # self.session: AsyncSession = session
         super().__init__(session)
         self.model = Menu
 

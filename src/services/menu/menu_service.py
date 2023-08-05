@@ -21,7 +21,7 @@ class MenuService(BaseService):
         self.database_repository: MenuCRUDRepository = database_repository
         self.redis = redis
 
-    async def add_count_children(self, **data) -> dict[str, int]:
+    async def add_count_children(self, data: dict) -> dict[str, int]:
         """func to count children"""
 
         count = await self.database_repository.count_children(menu_id=data['id'])
@@ -42,7 +42,7 @@ class MenuService(BaseService):
 
         if count_children:
             for i, menu in enumerate(menus):
-                menus[i] = await self.add_count_children(**menu)
+                menus[i] = await self.add_count_children(menu)
 
         await self.redis.set_menu_list_to_cache(menus)
 
@@ -58,7 +58,7 @@ class MenuService(BaseService):
         menu = await super().get_one(**kwargs)
 
         if count_children:
-            menu = await self.add_count_children(**menu)
+            menu = await self.add_count_children(menu)
 
         await self.redis.set_menu_to_cache(menu)
 
@@ -71,11 +71,8 @@ class MenuService(BaseService):
         menu = await super().create_obj(menu_data)
 
         if count_children:
-            menu = await self.add_count_children(**menu)
+            menu = await self.add_count_children(menu)
 
-        await self.redis.delete_from_cache(
-            'menu_list'
-        )  # Invalidate the menu list cache
         await self.redis.set_menu_to_cache(menu)
 
         return menu
@@ -87,7 +84,7 @@ class MenuService(BaseService):
         menu = await super().update_obj(menu_data, **kwargs)
 
         if count_children:
-            menu = await self.add_count_children(**menu)
+            menu = await self.add_count_children(menu)
 
         # Update cached menu by id and invalidate menu list
         await self.redis.set_menu_to_cache(menu)

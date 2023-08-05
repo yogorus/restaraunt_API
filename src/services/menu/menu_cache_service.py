@@ -1,3 +1,4 @@
+"""Module that provides all of the caching operation for Menu Service"""
 from uuid import UUID
 
 from src.services.base.base_cache_service import BaseCacheService
