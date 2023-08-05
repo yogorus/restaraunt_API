@@ -92,6 +92,5 @@ class MenuService(BaseService):
         return menu
 
     async def delete_obj(self, **kwargs) -> dict:
-        await self.redis.delete_from_cache(f"menu_{kwargs['id']}")
-        await self.redis.delete_from_cache('menu_list')
+        await self.redis.delete_menu_from_cache(kwargs['id'])
         return await super().delete_obj(**kwargs)
