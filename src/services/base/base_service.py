@@ -10,10 +10,10 @@ class BaseService:
     def __init__(self, database_repository: BaseCRUDRepository) -> None:
         self.database_repository = database_repository
 
-    async def get_list(self) -> list[dict]:
+    async def get_list(self, **kwargs) -> list[dict]:
         """Return list of menu dicts"""
 
-        obj_list = await self.database_repository.get_list()
+        obj_list = await self.database_repository.get_list(**kwargs)
         data_list = []
 
         for obj in obj_list:
@@ -29,9 +29,9 @@ class BaseService:
         data = {**obj.__dict__}
         return data
 
-    async def create_obj(self, input_data: BaseModel) -> dict:
+    async def create_obj(self, input_data: BaseModel, **kwargs) -> dict:
         """Create object and return dict"""
-        obj = await self.database_repository.create_object(input_data)
+        obj = await self.database_repository.create_object(input_data, **kwargs)
         output_data = {**obj.__dict__}
         return output_data
 

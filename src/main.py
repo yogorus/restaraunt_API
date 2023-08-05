@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from src.routers.menu import main as menu
+from src.routers.submenu import main as submenu
 
 # from .database import engine
 # from . import models
@@ -21,5 +22,5 @@ app = FastAPI()
 # dish_router = dish_router.router
 
 app.include_router(menu.router, tags=['menu'])
-# app.include_router(submenu_router, tags=["submenu"])
+app.include_router(submenu.router, tags=['submenu'])
 # app.include_router(dish_router, tags=["dish"])
