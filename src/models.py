@@ -1,13 +1,19 @@
-from sqlalchemy import Column, ForeignKey, Integer, Float, String
-from sqlalchemy.orm import relationship, validates
-from sqlalchemy.dialects.postgresql import UUID
+"""All of the models for the app"""
 import uuid
+
+from sqlalchemy import Column, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, validates
 
 from .database import Base
 
+# pylint: disable=too-few-public-methods
+
 
 class Menu(Base):
-    __tablename__ = "menus"
+    """Menu table"""
+
+    __tablename__ = 'menus'
 
     id = Column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
@@ -16,48 +22,44 @@ class Menu(Base):
     description = Column(String)
 
     submenus = relationship(
-        "Submenu",
-        back_populates="menu",
-        cascade="all,delete",
+        'Submenu',
+        back_populates='menu',
+        cascade='all,delete',
         passive_deletes=True,
-        lazy="selectin",
+        lazy='selectin',
     )
 
-    def submenus_count(self) -> int:
-        return len(self.submenus)
-
-    def dishes_count(self) -> int:
-        return sum(submenu.dishes_count() for submenu in self.submenus)
-
-    def get_submenus_titles(self) -> list[str]:
-        return [submenu.title for submenu in self.submenus]
+    # def get_submenus_titles(self) -> list[str]:
+    #     """Get titles of child submenus"""
+    #     return [submenu.title for submenu in self.submenus]
 
 
 class Submenu(Base):
-    __tablename__ = "submenus"
+    """Submenu Table"""
+
+    __tablename__ = 'submenus'
 
     id = Column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
     )
     title = Column(String)
     description = Column(String)
-    menu_id = Column(UUID(as_uuid=True), ForeignKey("menus.id", ondelete="CASCADE"))
+    menu_id = Column(UUID(as_uuid=True), ForeignKey('menus.id', ondelete='CASCADE'))
 
-    menu = relationship("Menu", back_populates="submenus", lazy="selectin")
+    menu = relationship('Menu', back_populates='submenus', lazy='selectin')
     dishes = relationship(
-        "Dish",
-        back_populates="submenu",
-        cascade="all,delete",
+        'Dish',
+        back_populates='submenu',
+        cascade='all,delete',
         passive_deletes=True,
-        lazy="selectin",
+        lazy='selectin',
     )
-
-    def dishes_count(self) -> int:
-        return len(self.dishes)
 
 
 class Dish(Base):
-    __tablename__ = "dishes"
+    """Dish Table"""
+
+    __tablename__ = 'dishes'
 
     id = Column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False
@@ -66,13 +68,15 @@ class Dish(Base):
     description = Column(String)
     price = Column(String)
     submenu_id = Column(
-        UUID(as_uuid=True), ForeignKey("submenus.id", ondelete="CASCADE")
+        UUID(as_uuid=True), ForeignKey('submenus.id', ondelete='CASCADE')
     )
 
-    submenu = relationship("Submenu", back_populates="dishes", lazy="selectin")
+    submenu = relationship('Submenu', back_populates='dishes', lazy='selectin')
 
-    @validates("price")
+    @validates('price')
     def validate_price(self, key, value):
+        # pylint: disable=unused-argument
+        """Validate price to be no less than len 4"""
         if len(value) < 4:
-            raise ValueError("Price length must be at least 4 characters!")
+            raise ValueError('Price length must be at least 4 characters!')
         return value

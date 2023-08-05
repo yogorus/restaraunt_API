@@ -24,10 +24,7 @@ class MenuService(BaseService):
     async def add_count_children(self, data: dict) -> dict[str, int]:
         """func to count children"""
 
-        count = (
-            await self.database_repository
-            .count_children(menu_id=data['id'])
-        )
+        count = await self.database_repository.count_children(menu_id=data['id'])
         data_count = count._asdict()
 
         data.update(data_count)
@@ -81,9 +78,7 @@ class MenuService(BaseService):
         return menu
 
     async def update_menu(
-        self, menu_data: menu_schemas.MenuBase,
-        count_children: bool = False,
-        **kwargs
+        self, menu_data: menu_schemas.MenuBase, count_children: bool = False, **kwargs
     ) -> dict:
         """Update menu and return dict"""
         menu = await super().update_obj(menu_data, **kwargs)
