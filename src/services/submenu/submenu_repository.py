@@ -29,8 +29,8 @@ class SubmenuCRUDRepository(BaseCRUDRepository):
         # pylint: disable=E1102
 
         query = await self.session.execute(
-            select(func.count(distinct(Dish.title)).label('title_count')).filter(
-                Dish.title == title
+            select(func.count(distinct(Submenu.title)).label('title_count')).filter(
+                Submenu.title == title
             )
         )
         result = query.scalar_one()

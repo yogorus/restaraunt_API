@@ -9,7 +9,7 @@ from .config import DB_HOST, DB_NAME, DB_PORT, POSTGRES_PASSWORD, POSTGRES_USER
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@ylab_db:5432/db"
 SQLALCHEMY_DATABASE_URL = f'postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
-engine = create_async_engine(SQLALCHEMY_DATABASE_URL, future=True, echo=True)
+engine = create_async_engine(SQLALCHEMY_DATABASE_URL, future=True)
 
 # SessionLocal = sessionmaker(
 #     engine, autocommit=False, autoflush=False, class_=AsyncSession

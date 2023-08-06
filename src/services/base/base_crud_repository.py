@@ -22,17 +22,12 @@ class BaseCRUDRepository(Generic[M, Schema]):
         self.session = session
         self.model: type[M]  # Define the model in the child class
         self.schema: type[Schema]
-        self.parent_repository: BaseCRUDRepository | None = None
+        self.parent_repository: BaseCRUDRepository[M, Schema] | None = None
 
     async def get_list(self, **kwargs) -> list[M]:
         """
         Get list of objects
-        If parent repo exists, it will recursivly check for its existence
         """
-        if self.parent_repository:
-            id_string = f'{self.parent_repository.model.__name__.lower()}_id'
-            await self.parent_repository.get_one(id=kwargs[f'{id_string}'])
-
         query = await self.session.execute(select(self.model).filter_by(**kwargs))
         result = list(query.scalars().all())
         return result
@@ -40,13 +35,8 @@ class BaseCRUDRepository(Generic[M, Schema]):
     async def get_one(self, **kwargs) -> M:
         """
         Get one database instanse
-        If parent repo exists, it will recursivly check for its existence
+        Raise exception of none
         """
-
-        if self.parent_repository:
-            id_string = f'{self.parent_repository.model.__name__.lower()}_id'
-            await self.parent_repository.get_one(id=kwargs[f'{id_string}'])
-
         query = await self.session.execute(select(self.model).filter_by(**kwargs))
         result: M | None = query.scalar()
 
@@ -59,10 +49,6 @@ class BaseCRUDRepository(Generic[M, Schema]):
 
     async def create_object(self, data: Schema, **kwargs) -> M:
         """Create object from data dump"""
-        if self.parent_repository:
-            id_string = f'{self.parent_repository.model.__name__.lower()}_id'
-            await self.parent_repository.get_one(id=kwargs[f'{id_string}'])
-
         obj = self.model(**data.model_dump())
         self.session.add(obj)
         await self.session.commit()

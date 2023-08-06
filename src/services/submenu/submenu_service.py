@@ -10,7 +10,7 @@ from src.services.submenu.submenu_repository import SubmenuCRUDRepository
 
 
 class SubmenuService(BaseService):
-    """Menu service converting db to dict, this one needs to pass menu_id to return error if parent doesn't exists"""
+    """Submenu service converting db to dict, this one needs to pass menu_id to return error if parent doesn't exists"""
 
     def __init__(
         self,
