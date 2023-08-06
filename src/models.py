@@ -29,10 +29,6 @@ class Menu(Base):
         lazy='selectin',
     )
 
-    # def get_submenus_titles(self) -> list[str]:
-    #     """Get titles of child submenus"""
-    #     return [submenu.title for submenu in self.submenus]
-
 
 class Submenu(Base):
     """Submenu Table"""
