@@ -41,9 +41,9 @@ class BaseCacheService:
         await self.redis.set(key, data)
         await self.redis.expire(key, self.expire)
 
-    async def delete_from_cache(self, key) -> None:
+    async def delete_from_cache(self, *keys) -> None:
         """delete from cache"""
-        await self.redis.delete(key)
+        await self.redis.delete(*keys)
 
     async def get_matched_keys(self, pattern: str) -> set:
         """Fetch keys that match the pattern"""
