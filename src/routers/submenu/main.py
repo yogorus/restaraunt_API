@@ -24,6 +24,8 @@ CommonDep = Annotated[dict, Depends(common_params)]
 @router.get(
     '/{menu_id}/submenus/',
     response_model=list[SubmenuOutput],
+    summary='Get list of all submenus of parent menu',
+    description="If parent submenu doesn't exist, an 404 error would be raised",
 )
 async def read_submenus(
     menu: Menu = Depends(return_menu_or_404), submenu: SubmenuService = Depends()
@@ -33,7 +35,13 @@ async def read_submenus(
 
 
 # Create submenu
-@router.post('/{menu_id}/submenus/', status_code=201, response_model=SubmenuOutput)
+@router.post(
+    '/{menu_id}/submenus/',
+    status_code=201,
+    response_model=SubmenuOutput,
+    summary='Create submenu',
+    description='Menu ID should be valid',
+)
 async def create_submenu(
     submenu_data: SubmenuBase,
     submenu: SubmenuService = Depends(),
@@ -46,7 +54,12 @@ async def create_submenu(
 
 
 # Get submenu by id
-@router.get('/{menu_id}/submenus/{submenu_id}', response_model=SubmenuOutput)
+@router.get(
+    '/{menu_id}/submenus/{submenu_id}',
+    response_model=SubmenuOutput,
+    summary='Get submenu by ID',
+    description='Menu ID should be valid',
+)
 async def read_submenu(
     submenu_id: UUID,
     menu: Menu = Depends(return_menu_or_404),
@@ -59,7 +72,12 @@ async def read_submenu(
 
 
 # Update submenu
-@router.patch('/{menu_id}/submenus/{submenu_id}', response_model=SubmenuOutput)
+@router.patch(
+    '/{menu_id}/submenus/{submenu_id}',
+    response_model=SubmenuOutput,
+    summary='Update submenu',
+    description='Menu ID and submenu ID should be valid',
+)
 async def update_submenu(
     submenu_id: UUID,
     submenu_data: SubmenuBase,
@@ -75,6 +93,8 @@ async def update_submenu(
 # Delete submenu
 @router.delete(
     '/{menu_id}/submenus/{submenu_id}',
+    summary='Delete submenu by id',
+    description='Menu ID and submenu ID should be valid',
 )
 async def delete_submenu(
     submenu_id: UUID,

@@ -11,7 +11,6 @@ from src.services.utils import return_submenu_or_404
 
 router = APIRouter(prefix='/api/v1/menus')
 BASE_URL = '/{menu_id}/submenus/{submenu_id}/dishes'
-# dependencies = [Depends(check_menu_id), Depends(check_submenu_id)]
 
 
 def common_params(menu_id: UUID, submenu_id: UUID):
@@ -26,7 +25,7 @@ CommonDep = Annotated[dict, Depends(common_params)]
 # # Code is designed to throw an error if parent menu and submenu doesn't exist,
 # but test expects an empty output and 200 status code,
 # so no dependencies in this route
-@router.get(f'{BASE_URL}/', response_model=list[Dish])
+@router.get(f'{BASE_URL}/', response_model=list[Dish], summary='Get all dishes')
 async def read_dishes(
     commons: CommonDep,
     dish: DishService = Depends(),
@@ -40,6 +39,8 @@ async def read_dishes(
     f'{BASE_URL}/',
     status_code=201,
     response_model=Dish,
+    summary='Create dish',
+    description="If parent ID's are not valid, an exception would be raised",
 )
 async def create_dish(
     dish_data: DishBaseModel,
@@ -56,6 +57,8 @@ async def create_dish(
 @router.get(
     f'{BASE_URL}/{{dish_id}}',
     response_model=Dish,
+    summary='Get dish by its ID',
+    description="If parent ID's are not valid, an exception would be raised",
 )
 async def read_dish(
     dish_id: UUID,
@@ -72,6 +75,8 @@ async def read_dish(
 @router.patch(
     f'{BASE_URL}/{{dish_id}}',
     response_model=Dish,
+    summary='Update dish with provided information',
+    description="If parent ID's are not valid, an exception would be raised",
 )
 async def patch_dish(
     dish_id: UUID,
@@ -87,6 +92,8 @@ async def patch_dish(
 
 @router.delete(
     f'{BASE_URL}/{{dish_id}}',
+    summary='Delete dish by ID',
+    description="If parent ID's are not valid, an exception would be raised",
 )
 async def delete_dish(
     dish_id: UUID,
