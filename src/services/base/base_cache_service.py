@@ -1,13 +1,27 @@
 """Redis base cache module"""
 import json
+import types
 
 import aioredis
-from fastapi.encoders import jsonable_encoder
 
 from src.config import REDIS_CACHE_TIME, REDIS_HOST, REDIS_PORT
 
 if REDIS_CACHE_TIME:
     expire = int(REDIS_CACHE_TIME)
+
+
+class CacheEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles circular references"""
+
+    def default(self, o):
+        """Without this thing encoding gets stuck in the recursive loop"""
+        if isinstance(o, types.GeneratorType):
+            return list(o)
+        try:
+            json.dumps(o)
+            return o
+        except TypeError:
+            return str(o)
 
 
 class BaseCacheService:
@@ -23,10 +37,17 @@ class BaseCacheService:
 
     async def set_to_cache(self, key: str, value: dict | list[dict]) -> None:
         """Set key-value to cache"""
-        data = json.dumps(jsonable_encoder(value))
+        data = json.dumps(value, cls=CacheEncoder)
         await self.redis.set(key, data)
         await self.redis.expire(key, self.expire)
 
     async def delete_from_cache(self, key) -> None:
         """delete from cache"""
         await self.redis.delete(key)
+
+    async def get_matched_keys(self, pattern: str) -> set:
+        """Fetch keys that match the pattern"""
+        keys = set()
+        async for key in self.redis.scan_iter(match=pattern):
+            keys.add(key)
+        return keys
