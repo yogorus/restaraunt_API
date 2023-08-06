@@ -27,10 +27,11 @@ CommonDep = Annotated[dict, Depends(common_params)]
 # so no dependencies in this route
 @router.get(f'{BASE_URL}/', response_model=list[Dish])
 async def read_dishes(
+    commons: CommonDep,
     dish: DishService = Depends(),
 ):
     """Route that returns list of dishes"""
-    return await dish.get_dishes()
+    return await dish.get_dishes(**commons)
 
 
 # # Create Dish
@@ -45,7 +46,9 @@ async def create_dish(
     dish: DishService = Depends(),
 ):
     """Route that creates dishes"""
-    return await dish.create_dish(dish_data, submenu_id=submenu.id)
+    return await dish.create_dish(
+        dish_data, submenu_id=submenu.id, menu_id=submenu.menu_id
+    )
 
 
 # # # Read dish by id
@@ -59,7 +62,9 @@ async def read_dish(
     dish: DishService = Depends(),
 ):
     """Return dish route"""
-    return await dish.get_dish(submenu_id=submenu.id, id=dish_id)
+    return await dish.get_dish(
+        submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
+    )
 
 
 # # Patch dish
@@ -75,7 +80,7 @@ async def patch_dish(
 ):
     """Update dish route"""
     return await dish.update_dish(
-        dish_data=dish_data, submenu_id=submenu.id, id=dish_id
+        dish_data=dish_data, submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
     )
 
 
@@ -88,4 +93,6 @@ async def delete_dish(
     dish: DishService = Depends(),
 ):
     """Delete dish route"""
-    return await dish.delete_obj(submenu_id=submenu.id, id=dish_id)
+    return await dish.delete_obj(
+        submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
+    )

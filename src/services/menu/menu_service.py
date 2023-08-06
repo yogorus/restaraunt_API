@@ -73,7 +73,7 @@ class MenuService(BaseService):
         if count_children:
             menu = await self.add_count_children(menu)
 
-        await self.redis.delete_menu_from_cache(menu_id=menu['id'])
+        await self.redis.invalidate_menu_list()
 
         return menu
 

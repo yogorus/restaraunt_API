@@ -10,7 +10,7 @@ from src.services.submenu.submenu_repository import SubmenuCRUDRepository
 
 
 class SubmenuService(BaseService):
-    """Submenu service converting db to dict, this one needs to pass menu_id to return error if parent doesn't exists"""
+    """Submenu service converting db to dict"""
 
     def __init__(
         self,
@@ -45,7 +45,7 @@ class SubmenuService(BaseService):
             for i, menu in enumerate(submenus):
                 submenus[i] = await self.add_count_children(menu)
 
-        await self.redis.set_submenu_list_to_cache(submenus, menu_id=kwargs['menu_id'])
+        await self.redis.set_submenu_list_to_cache(submenus, **kwargs)
 
         return submenus
 
@@ -63,6 +63,10 @@ class SubmenuService(BaseService):
         if count_children:
             submenu = await self.add_count_children(submenu)
 
+        await self.redis.set_submenu_to_cache(
+            submenu, menu_id=submenu['menu_id'], submenu_id=['id']
+        )
+
         return submenu
 
     async def create_submenu(
@@ -77,7 +81,7 @@ class SubmenuService(BaseService):
         if count_children:
             submenu = await self.add_count_children(submenu)
 
-        await self.redis.delete_submenu_from_cache(
+        await self.redis.invalidate_submenu_list(
             menu_id=kwargs['menu_id'], submenu_id=submenu['id']
         )
 
