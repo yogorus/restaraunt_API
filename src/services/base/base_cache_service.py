@@ -32,7 +32,7 @@ class BaseCacheService:
         self.expire = expire
 
     async def get_from_cache(self, key: str) -> str:
-        """set"""
+        """Get from cache"""
         return await self.redis.get(key)
 
     async def set_to_cache(self, key: str, value: dict | list[dict]) -> None:

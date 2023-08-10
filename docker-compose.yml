@@ -27,6 +27,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     # restart: always
 
   redis:
@@ -43,6 +45,39 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
+    networks:
+      - ylab_network
+
+  rabbitmq:
+    image: rabbitmq:3.12.2-management-alpine
+    container_name: rabbitmq
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_HEALTH_CHECK_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_HEALTH_CHECK_PASSWORD: ${RABBITMQ_PASSWORD}
+
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 20s
+
+    ports:
+      - 15672:15672
+      - 5672:5672
+
+    networks:
+      - ylab_network
+
+  celery_worker:
+    build: .
+    command: celery -A src.celery.celery_worker:celery worker --loglevel=info
+    depends_on:
+      - rabbitmq
+      - fastapi-ylab
     networks:
       - ylab_network
 
