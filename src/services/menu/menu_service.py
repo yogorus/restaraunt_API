@@ -65,9 +65,10 @@ class MenuService(BaseService):
         return menu
 
     async def create_menu(
-        self, menu_data: menu_schemas.MenuBase, count_children: bool = False
+        self, menu_data: menu_schemas.MenuBase, count_children: bool = False, **kwargs
     ) -> dict:
         """Create menu and return dict"""
+
         menu = await super().create_obj(menu_data)
 
         if count_children:

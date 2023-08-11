@@ -74,12 +74,14 @@ services:
 
   celery_worker:
     build: .
-    command: celery -A src.celery.celery_worker:celery worker --loglevel=info
+    entrypoint: celery -A src.celery.celery_worker:celery worker --beat --loglevel=info
     depends_on:
       - rabbitmq
       - fastapi-ylab
     networks:
       - ylab_network
+    volumes:
+      - ./:/app
 
   ylab_db:
     image: postgres:15.1-alpine

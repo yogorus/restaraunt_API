@@ -25,7 +25,10 @@ async def read_menus(menu: MenuService = Depends()):
     response_model=menu_schemas.MenuOutput,
     summary='Create menu with provided title and description',
 )
-async def create_menu(menu_data: menu_schemas.MenuBase, menu: MenuService = Depends()):
+async def create_menu(
+    menu_data: menu_schemas.MenuBase,
+    menu: MenuService = Depends(),
+):
     """Create Menu and return JSON"""
     return await menu.create_menu(menu_data, count_children=True)
 

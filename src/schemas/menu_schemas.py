@@ -10,6 +10,7 @@ class MenuBase(BaseModel):
 
     title: str
     description: str
+    id: UUID | None = None
 
 
 class Menu(MenuBase):

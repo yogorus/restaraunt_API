@@ -1,24 +1,82 @@
 """Tasks for celery"""
+import asyncio
+
+import httpx
 import pandas as pd
 
-# from src.models import Menu, Submenu, Dish
-menu_dict: dict = {}
+from src.celery.celery_worker import celery
+from src.main import app
 
-menu_df = pd.read_excel('admin/Menu.xlsx', header=None)
-for index, row in menu_df.iterrows():
-    # If this is a menu
-    if pd.notnull(row.iloc[0]):
-        print('Menu:')
-        print(row.iloc[0], row.iloc[1], row.iloc[2])
-    # If this is a submenu
-    elif row.iloc[1:4].notna().all():
-        print('Submenu:')
-        print(row.iloc[1], row.iloc[2], row.iloc[3])
-    # if row is a Dish
-    elif row.iloc[2:6].notna().all():
-        print('Dish:')
-        print(row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5])
 
+async def track_xlsx_to_db():
+    """
+    Function that tracks xlsx file and converts tables from it to database
+
+    """
+    current_menu: dict | None = None
+    # current_submenu: dict | None = None
+    base_url = 'http://ylab_api:8000'
+
+    menu_df = pd.read_excel('admin/Menu.xlsx', header=None)
+    async with httpx.AsyncClient(base_url=base_url) as client:
+        for index, row in menu_df.iterrows():
+            # pylint: disable=unused-variable
+            # If this is a menu row
+            if pd.notnull(row.iloc[0]):
+                menu_id = row.iloc[0]
+                title = row.iloc[1]
+                description = row.iloc[2]
+                response = await client.get(
+                    app.url_path_for('read_menu', menu_id=menu_id)
+                )
+                print(response.status_code)
+                # Create menu if it doesn't exists
+                if response.status_code == 404:
+                    data = {
+                        'id': menu_id,
+                        'title': title,
+                        'description': description,
+                    }
+                    response = await client.post(
+                        app.url_path_for('create_menu'), json=data
+                    )
+                    print(f'Created menu:\n{response.json()}')
+                    # print(f"no menu with id{menu_id}")
+                else:
+                    current_menu = response.json()
+                    print(f'Current menu is {current_menu}')
+
+                # print(row.iloc[0], row.iloc[1], row.iloc[2])
+            # If this is a submenu
+            elif row.iloc[1:4].notna().all():
+                # current_submenu = {
+                #     "id": row.iloc[1],
+                #     "title": row.iloc[2],
+                #     "description": row.iloc[3],
+                # }
+                # current_menu["submenus"].append()
+                print('Submenu:')
+                # print(row.iloc[1], row.iloc[2], row.iloc[3])
+            # if row is a Dish
+            elif row.iloc[2:6].notna().all():
+                print('Dish:')
+                # print(row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5])
+
+
+@celery.task
+def run_async_func():
+    """Function to run the function above in the event loop"""
+    loop = asyncio.get_event_loop()
+    return loop.run_until_complete(track_xlsx_to_db())
+
+
+# @celery.task()
+# def test_task():
+#     asyncio.run(track_xlsx_to_db)
+
+
+# await track_xlsx_to_db()
+# print(menus)
 
 # current_menu = None
 # current_submenu = None
