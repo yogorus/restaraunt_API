@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class SubmenuBase(BaseModel):
     """Input schema"""
 
+    id: UUID | None = None
     title: str
     description: str
 

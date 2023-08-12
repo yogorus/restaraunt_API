@@ -16,6 +16,7 @@ def validate_price(value):
 class DishBaseModel(BaseModel):
     """Base model for inputs"""
 
+    id: UUID | None = None
     title: str
     description: str
     price: constr(strip_whitespace=True)  # type: ignore

@@ -27,11 +27,10 @@ CommonDep = Annotated[dict, Depends(common_params)]
 # so no dependencies in this route
 @router.get(f'{BASE_URL}/', response_model=list[Dish], summary='Get all dishes')
 async def read_dishes(
-    commons: CommonDep,
-    dish: DishService = Depends(),
+    commons: CommonDep, dish: DishService = Depends(), filter_by_submenu: bool = False
 ):
     """Route that returns list of dishes"""
-    return await dish.get_dishes(**commons)
+    return await dish.get_dishes(filter_by_submenu=filter_by_submenu, **commons)
 
 
 # # Create Dish

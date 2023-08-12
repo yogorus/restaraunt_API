@@ -21,14 +21,18 @@ class DishService(BaseService):
         self.database_repository: DishCRUDRepository = database_repository
         self.redis = redis
 
-    async def get_dishes(self, **kwargs) -> list[dict]:
+    async def get_dishes(self, filter_by_submenu: bool, **kwargs) -> list[dict]:
         """Get list of dish dicts of submenu parent"""
         cached_data = await self.redis.get_dish_list_from_cache(**kwargs)
 
         if cached_data:
             return json.loads(cached_data)
 
-        dishes = await super().get_list()
+        if filter_by_submenu:
+            dishes = await super().get_list(submenu_id=kwargs['submenu_id'])
+
+        else:
+            dishes = await super().get_list()
 
         await self.redis.set_dish_list_to_cache(dishes, **kwargs)
 
@@ -65,7 +69,7 @@ class DishService(BaseService):
 
     async def update_dish(self, dish_data: DishBaseModel, **kwargs) -> dict:
         """Update dish and return dict"""
-
+        dish_data.id = kwargs['id']
         dish_data = DishForeignKey(
             **dish_data.model_dump(), submenu_id=kwargs['submenu_id']
         )

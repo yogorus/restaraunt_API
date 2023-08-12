@@ -1,8 +1,8 @@
 """CRUD operations for Menu"""
 from uuid import UUID
 
-from fastapi import Depends, HTTPException
-from sqlalchemy import Row, delete, distinct, func, select
+from fastapi import Depends
+from sqlalchemy import Row, distinct, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_db
@@ -34,12 +34,3 @@ class MenuCRUDRepository(BaseCRUDRepository):
 
         result = query.one()
         return result
-
-    async def delete_unspecified(self, id_list: list[UUID]) -> None:
-        """Delete unspecified menus"""
-        if not id_list:
-            raise HTTPException(422, detail='ID list is empty!')
-
-        stmt = delete(Menu).where(~Menu.id.in_(id_list))
-        await self.session.execute(stmt)
-        await self.session.commit()

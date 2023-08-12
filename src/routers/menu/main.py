@@ -64,15 +64,3 @@ async def patch_menu(
 ):
     """Update existing Menu and return JSON"""
     return await menu.update_menu(menu_data, count_children=True, id=menu_id)
-
-
-@router.delete(
-    '/',
-    summary='Delete all menus except specified',
-    description='Pass the list of ids to exclude them from deletion',
-)
-async def delete_unspecified_menus(
-    menu_id_list: list[UUID], menu: MenuService = Depends()
-):
-    """This route will delete all menus except those that have specified ids"""
-    return await menu.delete_unspecified_menus(menu_id_list)
