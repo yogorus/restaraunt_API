@@ -1,7 +1,7 @@
 """Main Menu Router"""
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.schemas import menu_schemas
 from src.services.menu.menu_service import MenuService
@@ -27,10 +27,11 @@ async def read_menus(menu: MenuService = Depends()):
 )
 async def create_menu(
     menu_data: menu_schemas.MenuBase,
+    background_tasks: BackgroundTasks,
     menu: MenuService = Depends(),
 ):
     """Create Menu and return JSON"""
-    return await menu.create_menu(menu_data, count_children=True)
+    return await menu.create_menu(menu_data, background_tasks, count_children=True)
 
 
 # Get Menu by id
@@ -47,9 +48,11 @@ async def read_menu(menu_id: UUID, menu: MenuService = Depends()):
 
 # Delete menu by id
 @router.delete('/{menu_id}', summary='Delete menu by id')
-async def delete_menu(menu_id: UUID, menu: MenuService = Depends()):
+async def delete_menu(
+    menu_id: UUID, background_tasks: BackgroundTasks, menu: MenuService = Depends()
+):
     """Delete menu and return json"""
-    return await menu.delete_obj(id=menu_id)
+    return await menu.delete_menu(background_tasks, id=menu_id)
 
 
 # Patch menu by id
@@ -60,7 +63,12 @@ async def delete_menu(menu_id: UUID, menu: MenuService = Depends()):
     description='ID should be valid',
 )
 async def patch_menu(
-    menu_id: UUID, menu_data: menu_schemas.MenuBase, menu: MenuService = Depends()
+    menu_id: UUID,
+    menu_data: menu_schemas.MenuBase,
+    background_tasks: BackgroundTasks,
+    menu: MenuService = Depends(),
 ):
     """Update existing Menu and return JSON"""
-    return await menu.update_menu(menu_data, count_children=True, id=menu_id)
+    return await menu.update_menu(
+        menu_data, background_tasks, count_children=True, id=menu_id
+    )

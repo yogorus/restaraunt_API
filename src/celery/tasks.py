@@ -6,9 +6,9 @@ import pandas as pd
 from src.celery.celery_worker import celery
 from src.celery.utils import (
     cleanup_database,
-    hande_submenu_row,
     handle_dish_row,
     handle_menu_row,
+    handle_submenu_row,
 )
 
 
@@ -35,7 +35,7 @@ async def track_xlsx_to_db() -> None:
 
         # If this is a submenu
         elif row.iloc[1:4].notna().all():
-            submenu = await hande_submenu_row(row, menu_list[menu_counter]['id'])
+            submenu = await handle_submenu_row(row, menu_list[menu_counter]['id'])
             submenu['dishes'] = []
             menu_list[menu_counter]['submenus'].append(submenu)
             submenu_counter += 1
@@ -49,7 +49,6 @@ async def track_xlsx_to_db() -> None:
             )
             menu_list[menu_counter]['submenus'][submenu_counter]['dishes'].append(dish)
 
-            # print(row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5])
     # Cleanup the database
     await cleanup_database(menu_list)
 

@@ -45,7 +45,7 @@ async def handle_menu_row(row: Series) -> dict:
         return result.json()
 
 
-async def hande_submenu_row(row: Series, menu_id: UUID) -> dict:
+async def handle_submenu_row(row: Series, menu_id: UUID) -> dict:
     """Perform CRUD from excel submenu row and return submenu dictionary"""
     async with httpx.AsyncClient(base_url=BASE_URL) as client:
         submenu_id = row.iloc[1]

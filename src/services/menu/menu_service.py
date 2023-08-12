@@ -1,7 +1,7 @@
 """Menu Service layer"""
 import json
 
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 
 from src.schemas import menu_schemas
 from src.services.base.base_service import BaseService
@@ -65,7 +65,11 @@ class MenuService(BaseService):
         return menu
 
     async def create_menu(
-        self, menu_data: menu_schemas.MenuBase, count_children: bool = False, **kwargs
+        self,
+        menu_data: menu_schemas.MenuBase,
+        background_tasks: BackgroundTasks,
+        count_children: bool = False,
+        **kwargs
     ) -> dict:
         """Create menu and return dict"""
 
@@ -74,12 +78,17 @@ class MenuService(BaseService):
         if count_children:
             menu = await self.add_count_children(menu)
 
-        await self.redis.invalidate_menu_list()
+        background_tasks.add_task(self.redis.invalidate_menu_list)
+        # await self.redis.invalidate_menu_list()
 
         return menu
 
     async def update_menu(
-        self, menu_data: menu_schemas.MenuBase, count_children: bool = False, **kwargs
+        self,
+        menu_data: menu_schemas.MenuBase,
+        background_task: BackgroundTasks,
+        count_children: bool = False,
+        **kwargs
     ) -> dict:
         """Update menu and return dict"""
         menu = await super().update_obj(menu_data, **kwargs)
@@ -88,10 +97,15 @@ class MenuService(BaseService):
             menu = await self.add_count_children(menu)
 
         # Update cached menu by id and invalidate menu list
-        await self.redis.delete_menu_from_cache(menu_id=menu['id'])
+        # await self.redis.delete_menu_from_cache(menu_id=menu["id"])
+        background_task.add_task(self.redis.delete_menu_from_cache, menu_id=menu['id'])
 
         return menu
 
-    async def delete_obj(self, **kwargs) -> dict:
-        await self.redis.delete_menu_from_cache(menu_id=kwargs['id'])
+    async def delete_menu(self, background_tasks: BackgroundTasks, **kwargs) -> dict:
+        """Delete menu"""
+        # await self.redis.delete_menu_from_cache(menu_id=kwargs["id"])
+        background_tasks.add_task(
+            self.redis.delete_menu_from_cache, menu_id=kwargs['id']
+        )
         return await super().delete_obj(**kwargs)
