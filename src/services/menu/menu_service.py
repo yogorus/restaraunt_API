@@ -1,5 +1,6 @@
 """Menu Service layer"""
 import json
+from uuid import UUID
 
 from fastapi import Depends
 
@@ -95,3 +96,10 @@ class MenuService(BaseService):
     async def delete_obj(self, **kwargs) -> dict:
         await self.redis.delete_menu_from_cache(menu_id=kwargs['id'])
         return await super().delete_obj(**kwargs)
+
+    async def delete_unspecified_menus(self, menu_id_list: list[UUID]) -> dict:
+        """Delete unspcified menus"""
+        for menu_id in menu_id_list:
+            await self.redis.delete_menu_from_cache(menu_id=menu_id)
+        await self.database_repository.delete_unspecified(menu_id_list)
+        return {'status': True, 'message': 'success'}
