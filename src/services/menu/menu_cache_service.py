@@ -8,6 +8,7 @@ class MenuCacheService(BaseCacheService):
     async def invalidate_menu_list(self) -> None:
         """Delete menu list from cache"""
         await self.delete_from_cache('menu_list')
+        await self.delete_from_cache('get_all')
 
     async def get_menu_list_from_cache(self) -> str:
         """Get menu list from cache"""
