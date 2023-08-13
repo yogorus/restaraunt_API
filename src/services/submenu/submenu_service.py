@@ -1,7 +1,7 @@
 """Submenu Service layer"""
 import json
 
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 
 from src.schemas.submenu_schemas import SubmenuBase, SubmenuForeignKey
 from src.services.base.base_service import BaseService
@@ -64,13 +64,17 @@ class SubmenuService(BaseService):
             submenu = await self.add_count_children(submenu)
 
         await self.redis.set_submenu_to_cache(
-            submenu, menu_id=submenu['menu_id'], submenu_id=['id']
+            submenu, menu_id=submenu['menu_id'], submenu_id=submenu['id']
         )
 
         return submenu
 
     async def create_submenu(
-        self, submenu_data: SubmenuBase, count_children: bool = False, **kwargs
+        self,
+        submenu_data: SubmenuBase,
+        background_tasks: BackgroundTasks,
+        count_children: bool = False,
+        **kwargs
     ) -> dict:
         """Create Submenu and return dict"""
         submenu_data = SubmenuForeignKey(
@@ -78,32 +82,46 @@ class SubmenuService(BaseService):
         )
         submenu = await super().create_obj(submenu_data, **kwargs)
 
+        background_tasks.add_task(
+            self.redis.invalidate_submenu_list,
+            menu_id=kwargs['menu_id'],
+            submenu_id=submenu['id'],
+        )
+
         if count_children:
             submenu = await self.add_count_children(submenu)
 
-        await self.redis.invalidate_submenu_list(
-            menu_id=kwargs['menu_id'], submenu_id=submenu['id']
-        )
-
+        # await self.redis.invalidate_submenu_list(
+        #     menu_id=kwargs["menu_id"], submenu_id=submenu["id"]
+        # )
         return submenu
 
     async def update_submenu(
-        self, submenu_data: SubmenuBase, count_children: bool = False, **kwargs
+        self,
+        submenu_data: SubmenuBase,
+        background_tasks: BackgroundTasks,
+        count_children: bool = False,
+        **kwargs
     ) -> dict:
         """Update Submenu and return dict"""
+        background_tasks.add_task(
+            self.redis.delete_submenu_from_cache,
+            menu_id=kwargs['menu_id'],
+            submenu_id=kwargs['id'],
+        )
+
         submenu = await super().update_obj(submenu_data, **kwargs)
 
         if count_children:
             submenu = await self.add_count_children(submenu)
 
-        await self.redis.delete_submenu_from_cache(
-            menu_id=kwargs['menu_id'], submenu_id=submenu['id']
-        )
-
         return submenu
 
-    async def delete_obj(self, **kwargs) -> dict:
-        await self.redis.delete_submenu_from_cache(
-            submenu_id=kwargs['id'], menu_id=kwargs['menu_id']
+    async def delete_submenu(self, background_tasks: BackgroundTasks, **kwargs) -> dict:
+        """Delete submenu"""
+        background_tasks.add_task(
+            self.redis.delete_submenu_from_cache,
+            menu_id=kwargs['menu_id'],
+            submenu_id=kwargs['id'],
         )
         return await super().delete_obj(**kwargs)

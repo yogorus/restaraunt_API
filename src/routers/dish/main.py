@@ -2,7 +2,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.models import Submenu
 from src.schemas.dish_schemas import Dish, DishBaseModel
@@ -43,12 +43,13 @@ async def read_dishes(
 )
 async def create_dish(
     dish_data: DishBaseModel,
+    background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
 ):
     """Route that creates dishes"""
     return await dish.create_dish(
-        dish_data, submenu_id=submenu.id, menu_id=submenu.menu_id
+        dish_data, background_tasks, submenu_id=submenu.id, menu_id=submenu.menu_id
     )
 
 
@@ -80,12 +81,17 @@ async def read_dish(
 async def patch_dish(
     dish_id: UUID,
     dish_data: DishBaseModel,
+    background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
 ):
     """Update dish route"""
     return await dish.update_dish(
-        dish_data=dish_data, submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
+        dish_data,
+        background_tasks,
+        submenu_id=submenu.id,
+        id=dish_id,
+        menu_id=submenu.menu_id,
     )
 
 
@@ -96,10 +102,11 @@ async def patch_dish(
 )
 async def delete_dish(
     dish_id: UUID,
+    background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
 ):
     """Delete dish route"""
-    return await dish.delete_obj(
-        submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
+    return await dish.delete_dish(
+        background_tasks, submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
     )

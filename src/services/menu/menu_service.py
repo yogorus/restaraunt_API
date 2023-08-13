@@ -72,14 +72,12 @@ class MenuService(BaseService):
         **kwargs
     ) -> dict:
         """Create menu and return dict"""
+        background_tasks.add_task(self.redis.invalidate_menu_list)
 
         menu = await super().create_obj(menu_data)
 
         if count_children:
             menu = await self.add_count_children(menu)
-
-        background_tasks.add_task(self.redis.invalidate_menu_list)
-        # await self.redis.invalidate_menu_list()
 
         return menu
 
@@ -91,20 +89,21 @@ class MenuService(BaseService):
         **kwargs
     ) -> dict:
         """Update menu and return dict"""
+
+        # Update cached menu by id and invalidate menu list
+        background_task.add_task(
+            self.redis.delete_menu_from_cache, menu_id=kwargs['id']
+        )
+
         menu = await super().update_obj(menu_data, **kwargs)
 
         if count_children:
             menu = await self.add_count_children(menu)
 
-        # Update cached menu by id and invalidate menu list
-        # await self.redis.delete_menu_from_cache(menu_id=menu["id"])
-        background_task.add_task(self.redis.delete_menu_from_cache, menu_id=menu['id'])
-
         return menu
 
     async def delete_menu(self, background_tasks: BackgroundTasks, **kwargs) -> dict:
         """Delete menu"""
-        # await self.redis.delete_menu_from_cache(menu_id=kwargs["id"])
         background_tasks.add_task(
             self.redis.delete_menu_from_cache, menu_id=kwargs['id']
         )

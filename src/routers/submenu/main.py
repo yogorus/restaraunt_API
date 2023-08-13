@@ -2,7 +2,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from src.models import Menu
 from src.schemas.submenu_schemas import SubmenuBase, SubmenuOutput
@@ -44,12 +44,13 @@ async def read_submenus(
 )
 async def create_submenu(
     submenu_data: SubmenuBase,
+    background_tasks: BackgroundTasks,
     submenu: SubmenuService = Depends(),
     menu: Menu = Depends(return_menu_or_404),
 ):
     """Create submenu route"""
     return await submenu.create_submenu(
-        submenu_data, count_children=True, menu_id=menu.id
+        submenu_data, background_tasks, count_children=True, menu_id=menu.id
     )
 
 
@@ -81,12 +82,17 @@ async def read_submenu(
 async def update_submenu(
     submenu_id: UUID,
     submenu_data: SubmenuBase,
+    background_tasks: BackgroundTasks,
     submenu: SubmenuService = Depends(),
     menu: Menu = Depends(return_menu_or_404),
 ):
     """Update submenu route"""
     return await submenu.update_submenu(
-        submenu_data, count_children=True, id=submenu_id, menu_id=menu.id
+        submenu_data,
+        background_tasks,
+        count_children=True,
+        id=submenu_id,
+        menu_id=menu.id,
     )
 
 
@@ -98,9 +104,10 @@ async def update_submenu(
 )
 async def delete_submenu(
     submenu_id: UUID,
+    background_tasks: BackgroundTasks,
     menu: Menu = Depends(return_menu_or_404),
     submenu: SubmenuService = Depends(),
 ):
     """Delete submenu route"""
-    await submenu.delete_obj(id=submenu_id, menu_id=menu.id)
+    await submenu.delete_submenu(background_tasks, id=submenu_id, menu_id=menu.id)
     return {'status': True, 'message': 'The submenu has been deleted'}

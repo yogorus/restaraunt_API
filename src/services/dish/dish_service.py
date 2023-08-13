@@ -1,7 +1,7 @@
 """Dish service layers"""
 import json
 
-from fastapi import Depends
+from fastapi import BackgroundTasks, Depends
 
 from src.schemas.dish_schemas import DishBaseModel, DishForeignKey
 from src.services.base.base_service import BaseService
@@ -54,8 +54,11 @@ class DishService(BaseService):
 
         return dish
 
-    async def create_dish(self, dish_data: DishBaseModel, **kwargs) -> dict:
+    async def create_dish(
+        self, dish_data: DishBaseModel, background_tasks: BackgroundTasks, **kwargs
+    ) -> dict:
         """Create dish and return dict"""
+        background_tasks.add_task(self.redis.invalidate_dish_list, **kwargs)
 
         dish_data = DishForeignKey(
             **dish_data.model_dump(), submenu_id=kwargs['submenu_id']
@@ -63,23 +66,26 @@ class DishService(BaseService):
 
         dish = await super().create_obj(dish_data)
 
-        await self.redis.invalidate_dish_list(**kwargs)
-
         return dish
 
-    async def update_dish(self, dish_data: DishBaseModel, **kwargs) -> dict:
+    async def update_dish(
+        self, dish_data: DishBaseModel, background_tasks: BackgroundTasks, **kwargs
+    ) -> dict:
         """Update dish and return dict"""
+        background_tasks.add_task(
+            self.redis.delete_dish_from_cache, dish_id=kwargs['id'], **kwargs
+        )
         dish_data.id = kwargs['id']
         dish_data = DishForeignKey(
             **dish_data.model_dump(), submenu_id=kwargs['submenu_id']
         )
 
         dish = await super().update_obj(dish_data, id=kwargs['id'])
-
-        await self.redis.delete_dish_from_cache(**kwargs, dish_id=kwargs['id'])
-
         return dish
 
-    async def delete_obj(self, **kwargs) -> dict:
-        await self.redis.delete_dish_from_cache(**kwargs, dish_id=kwargs['id'])
+    async def delete_dish(self, background_tasks: BackgroundTasks, **kwargs) -> dict:
+        """Delete dish"""
+        background_tasks.add_task(
+            self.redis.delete_dish_from_cache, dish_id=kwargs['id'], **kwargs
+        )
         return await super().delete_obj(id=kwargs['id'])
