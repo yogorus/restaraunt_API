@@ -175,8 +175,8 @@ async def cleanup_submenu(menu_list: list[dict], client: httpx.AsyncClient) -> N
     """Delete submenus that are not present in excel table"""
 
     # For every menu, check its child submenus
-    submenu_xlsx_id_list: list[dict[str, UUID]] = []
-    submenu_db_id_list: list[dict[str, UUID]] = []
+    submenu_xlsx_id_list: list[tuple] = []
+    submenu_db_id_list: list[tuple] = []
 
     # For every menu, get its child submenus
     for menu in menu_list:
@@ -193,18 +193,19 @@ async def cleanup_submenu(menu_list: list[dict], client: httpx.AsyncClient) -> N
         if len(response_submenus_json) > len(menu['submenus']):
             # Append these ids to submenu id lists
             submenu_xlsx_id_list += [
-                {'submenu_id': submenu['id'], 'menu_id': menu['id']}
-                for submenu in menu['submenus']
+                (submenu['id'], menu['id']) for submenu in menu['submenus']
             ]
+            # TODO: FIX SUBMENU MENU ID(NOT IN RESPONSE)
             submenu_db_id_list += [
-                {'submenu_id': submenu['id'], 'menu_id': submenu['menu_id']}
+                (submenu['id'], submenu['menu_id'])
                 for submenu in response_submenus_json
             ]
 
     # Get submenus UUIDs not present in the excel table
-    non_matches: list[dict] = list(
+    non_matches: list[tuple] = list(
         set(submenu_db_id_list).difference(submenu_xlsx_id_list)
     )
+    print(non_matches)
 
     # Delete non matching submenus
     if non_matches:
@@ -212,8 +213,8 @@ async def cleanup_submenu(menu_list: list[dict], client: httpx.AsyncClient) -> N
             await client.delete(
                 app.url_path_for(
                     'delete_submenu',
-                    menu_id=submenu['menu_id'],
-                    submenu_id=submenu['submenu_id'],
+                    submenu_id=submenu[0],
+                    menu_id=submenu[1],
                 )
             )
 

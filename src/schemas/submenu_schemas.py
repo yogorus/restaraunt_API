@@ -23,7 +23,7 @@ class SubmenuForeignKey(SubmenuBase):
     #     orm_mode = True
 
 
-class Submenu(SubmenuBase):
+class Submenu(SubmenuForeignKey):
     """Schema after creation"""
 
     id: UUID
