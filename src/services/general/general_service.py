@@ -20,7 +20,7 @@ class GeneralService(BaseService):
         self.database_repository: GeneralCRUDRepository = database_repository
         self.redis = redis
 
-    async def get_all(self) -> list[MenuGeneral]:
+    async def get_all(self) -> list[dict]:
         """Get all menus with every child and convert those into pydantic model"""
 
         cached_data = await self.redis.get_from_cache('get_all')
@@ -35,7 +35,9 @@ class GeneralService(BaseService):
         for row in data:
             row_dict = row._asdict()
             menu_dict = row_dict['Menu']
-            result.append(MenuGeneral.model_validate(menu_dict))
+            result.append(menu_dict)
 
-        await self.redis.set_to_cache('get_all', [item.__dict__ for item in result])
+        await self.redis.set_to_cache(
+            'get_all', [MenuGeneral(**item.__dict__).model_dump() for item in result]
+        )
         return result

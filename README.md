@@ -17,8 +17,9 @@
 
 - ## ДЗ 3
 
-  > 1. Описания находятся в **src/routers/\*/main.py**. Для каждого из путей есть описание в summary и, иногда, description
-  > 2. Аналог _Django reverse()_ реализован через app.url_path_for() для каждого из теста в папке tests
+> 1. Описания находятся в **src/routers/\*/main.py**. Для каждого из путей есть описание в summary и, иногда, description
+> 2. Аналог _Django reverse()_ реализован через app.url_path_for() для каждого из теста в папке tests
 
 - ## ДЗ 4
-  > TODO
+  > 1. TODO
+  > 2. TODO
