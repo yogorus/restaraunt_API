@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.submenu_schemas import SubmenuGeneral
+
 
 # from ..submenu import schemas as submenu
 class MenuBase(BaseModel):
@@ -26,3 +28,9 @@ class MenuOutput(Menu):
 
     submenus_count: int | None = None
     dishes_count: int | None = None
+
+
+class MenuGeneral(Menu):
+    """Menu schema of menu with all children"""
+
+    submenus: list[SubmenuGeneral]

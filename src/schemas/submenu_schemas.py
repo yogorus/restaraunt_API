@@ -3,6 +3,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.dish_schemas import Dish
+
 
 class SubmenuBase(BaseModel):
     """Input schema"""
@@ -33,3 +35,9 @@ class SubmenuOutput(Submenu):
     """Schema for output"""
 
     dishes_count: int | None = None
+
+
+class SubmenuGeneral(Submenu):
+    """Schema with child dishes"""
+
+    dishes: list[Dish]
