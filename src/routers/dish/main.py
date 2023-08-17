@@ -28,7 +28,7 @@ CommonDep = Annotated[dict, Depends(common_params)]
 @router.get(f'{BASE_URL}/', response_model=list[Dish], summary='Get all dishes')
 async def read_dishes(
     commons: CommonDep, dish: DishService = Depends(), filter_by_submenu: bool = False
-):
+) -> list[dict]:
     """Route that returns list of dishes"""
     return await dish.get_dishes(filter_by_submenu=filter_by_submenu, **commons)
 
@@ -46,7 +46,7 @@ async def create_dish(
     background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
-):
+) -> dict:
     """Route that creates dishes"""
     return await dish.create_dish(
         dish_data, background_tasks, submenu_id=submenu.id, menu_id=submenu.menu_id
@@ -64,7 +64,7 @@ async def read_dish(
     dish_id: UUID,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
-):
+) -> dict:
     """Return dish route"""
     return await dish.get_dish(
         submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id
@@ -84,7 +84,7 @@ async def patch_dish(
     background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
-):
+) -> dict:
     """Update dish route"""
     return await dish.update_dish(
         dish_data,
@@ -105,7 +105,7 @@ async def delete_dish(
     background_tasks: BackgroundTasks,
     submenu: Submenu = Depends(return_submenu_or_404),
     dish: DishService = Depends(),
-):
+) -> dict:
     """Delete dish route"""
     return await dish.delete_dish(
         background_tasks, submenu_id=submenu.id, id=dish_id, menu_id=submenu.menu_id

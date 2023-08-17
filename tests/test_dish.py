@@ -1,4 +1,6 @@
 """Tests for dish"""
+from typing import AsyncGenerator
+
 import pytest
 from httpx import AsyncClient
 
@@ -10,7 +12,9 @@ from tests.test_submenu import create_menu, create_submenu
 
 
 @pytest.fixture(scope='session')
-async def create_dish(client: AsyncClient, create_menu, create_submenu):
+async def create_dish(
+    client: AsyncClient, create_menu, create_submenu
+) -> AsyncGenerator[dict, None]:
     """Fixture to create dish"""
     sent_json = {
         'title': 'My dish 1',
@@ -36,7 +40,9 @@ async def create_dish(client: AsyncClient, create_menu, create_submenu):
 
 
 @pytest.fixture(scope='session')
-async def patch_dish(client: AsyncClient, create_menu, create_submenu, create_dish):
+async def patch_dish(
+    client: AsyncClient, create_menu, create_submenu, create_dish
+) -> AsyncGenerator[dict, None]:
     """Update dish fixture"""
     sent_json = {
         'title': 'My updated dish 1',
@@ -68,7 +74,9 @@ async def patch_dish(client: AsyncClient, create_menu, create_submenu, create_di
 
 
 @pytest.fixture(scope='session')
-async def delete_dish(client: AsyncClient, create_menu, create_submenu, patch_dish):
+async def delete_dish(
+    client: AsyncClient, create_menu, create_submenu, patch_dish
+) -> AsyncGenerator[dict, None]:
     """Delete dish fixture"""
     response = await client.delete(
         app.url_path_for(
@@ -83,7 +91,9 @@ async def delete_dish(client: AsyncClient, create_menu, create_submenu, patch_di
     yield {'id': patch_dish['id']}
 
 
-async def test_dish_empty_list(client: AsyncClient, create_menu, create_submenu):
+async def test_dish_empty_list(
+    client: AsyncClient, create_menu, create_submenu
+) -> None:
     """Test that dish is empty before creation"""
     response = await client.get(
         app.url_path_for(
@@ -98,7 +108,7 @@ async def test_dish_empty_list(client: AsyncClient, create_menu, create_submenu)
 
 async def test_dish_list_after_create(
     client: AsyncClient, create_menu, create_submenu, create_dish
-):
+) -> None:
     """Test that dish list is not empty after create"""
     response = await client.get(
         app.url_path_for(
@@ -113,7 +123,7 @@ async def test_dish_list_after_create(
 
 async def test_dish_by_id_after_create(
     client: AsyncClient, create_menu, create_submenu, create_dish
-):
+) -> None:
     """Test dish exists after create"""
     response = await client.get(
         app.url_path_for(
@@ -129,7 +139,7 @@ async def test_dish_by_id_after_create(
 
 async def test_response_from_updated_dish(
     client: AsyncClient, create_menu, create_submenu, patch_dish
-):
+) -> None:
     """Test dish values are up to date"""
     response = await client.get(
         app.url_path_for(
@@ -145,7 +155,7 @@ async def test_response_from_updated_dish(
 
 async def test_dish_list_after_delete(
     client: AsyncClient, create_menu, create_submenu, delete_dish
-):
+) -> None:
     """Test dish list is empty after delete"""
     response = await client.get(
         app.url_path_for(
@@ -160,7 +170,7 @@ async def test_dish_list_after_delete(
 
 async def test_dish_by_id_after_delete(
     client: AsyncClient, create_menu, create_submenu, delete_dish
-):
+) -> None:
     """Test dish doesn't exists after delete"""
     response = await client.get(
         app.url_path_for(
@@ -176,7 +186,7 @@ async def test_dish_by_id_after_delete(
 
 async def test_submenu_list_after_submenu_delete(
     client: AsyncClient, create_menu, create_submenu
-):
+) -> None:
     """Test that submenu list is empty after delete"""
     response = await client.delete(
         app.url_path_for(
@@ -192,7 +202,7 @@ async def test_submenu_list_after_submenu_delete(
     assert response.json() == []
 
 
-async def test_menu_list_after_menu_delete(client: AsyncClient, create_menu):
+async def test_menu_list_after_menu_delete(client: AsyncClient, create_menu) -> None:
     """Test menu list is empty after delete"""
     response = await client.delete(
         app.url_path_for('delete_menu', menu_id=create_menu['id'])
@@ -202,12 +212,3 @@ async def test_menu_list_after_menu_delete(client: AsyncClient, create_menu):
     response = await client.get(app.url_path_for('read_menus'))
     assert response.status_code == 200
     assert response.json() == []
-
-
-# def test_dish_list_after_menu_delete(create_menu, create_submenu, create_dish):
-#     response = client.delete(f"{base_url}/menus/{create_menu['id']}")
-
-#     response = client.get(
-#         f"{base_url}/menus/{create_menu['id']}/submenus/{create_submenu['id']}/dishes/"
-#     )
-#     assert response.json() == []

@@ -29,7 +29,7 @@ CommonDep = Annotated[dict, Depends(common_params)]
 )
 async def read_submenus(
     menu: Menu = Depends(return_menu_or_404), submenu: SubmenuService = Depends()
-):
+) -> list[dict]:
     """All submenus route"""
     return await submenu.get_submenus(count_children=True, menu_id=menu.id)
 
@@ -47,7 +47,7 @@ async def create_submenu(
     background_tasks: BackgroundTasks,
     submenu: SubmenuService = Depends(),
     menu: Menu = Depends(return_menu_or_404),
-):
+) -> dict:
     """Create submenu route"""
     return await submenu.create_submenu(
         submenu_data, background_tasks, count_children=True, menu_id=menu.id
@@ -65,7 +65,7 @@ async def read_submenu(
     submenu_id: UUID,
     menu: Menu = Depends(return_menu_or_404),
     submenu: SubmenuService = Depends(),
-):
+) -> dict:
     """Read submenu by id"""
     return await submenu.get_submenu(
         count_children=True, menu_id=menu.id, id=submenu_id
@@ -85,7 +85,7 @@ async def update_submenu(
     background_tasks: BackgroundTasks,
     submenu: SubmenuService = Depends(),
     menu: Menu = Depends(return_menu_or_404),
-):
+) -> dict:
     """Update submenu route"""
     return await submenu.update_submenu(
         submenu_data,
@@ -107,7 +107,7 @@ async def delete_submenu(
     background_tasks: BackgroundTasks,
     menu: Menu = Depends(return_menu_or_404),
     submenu: SubmenuService = Depends(),
-):
+) -> dict:
     """Delete submenu route"""
     await submenu.delete_submenu(background_tasks, id=submenu_id, menu_id=menu.id)
     return {'status': True, 'message': 'The submenu has been deleted'}

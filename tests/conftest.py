@@ -1,6 +1,7 @@
 """Config for pytest"""
 import asyncio
-from typing import AsyncGenerator
+from asyncio import AbstractEventLoop
+from typing import AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
@@ -10,7 +11,7 @@ from src.main import app
 
 
 @pytest.fixture(scope='session')
-def event_loop(request):
+def event_loop(request) -> Generator[AbstractEventLoop, None, None]:
     # pylint: disable=unused-argument
     """Create an instance of the default event loop for each test case."""
     loop = asyncio.get_event_loop_policy().new_event_loop()

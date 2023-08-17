@@ -10,6 +10,6 @@ router = APIRouter(prefix='/api/v1')
 @router.get(
     '/all', summary='Get all data from the database', response_model=list[MenuGeneral]
 )
-async def get_all(general: GeneralService = Depends()):
+async def get_all(general: GeneralService = Depends()) -> list[dict]:
     """Request to get everything from the database"""
     return await general.get_all()

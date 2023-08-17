@@ -1,4 +1,6 @@
 """Tests for submenu"""
+from typing import AsyncGenerator
+
 import pytest
 from httpx import AsyncClient
 
@@ -10,7 +12,9 @@ from tests.test_menu import create_menu, delete_menu
 
 
 @pytest.fixture(scope='session')
-async def create_submenu(client: AsyncClient, create_menu):
+async def create_submenu(
+    client: AsyncClient, create_menu
+) -> AsyncGenerator[dict, None]:
     """Fixture to create submenu and access the jsonifed result"""
     sent_json = {'title': 'My submenu 1', 'description': 'My submenu description 1'}
     response = await client.post(
@@ -26,7 +30,9 @@ async def create_submenu(client: AsyncClient, create_menu):
 
 
 @pytest.fixture(scope='session')
-async def patch_submenu(client: AsyncClient, create_menu, create_submenu):
+async def patch_submenu(
+    client: AsyncClient, create_menu, create_submenu
+) -> AsyncGenerator[dict, None]:
     """Fixture to update submenu and access the jsonified result"""
     sent_json = {
         'title': 'My updated submenu 1',
@@ -52,7 +58,9 @@ async def patch_submenu(client: AsyncClient, create_menu, create_submenu):
 
 
 @pytest.fixture(scope='session')
-async def delete_submenu(client: AsyncClient, create_menu, patch_submenu):
+async def delete_submenu(
+    client: AsyncClient, create_menu, patch_submenu
+) -> AsyncGenerator[dict, None]:
     """Delete fixture"""
     response = await client.delete(
         app.url_path_for(
@@ -66,7 +74,7 @@ async def delete_submenu(client: AsyncClient, create_menu, patch_submenu):
 
 
 # No submenus
-async def test_emtpy_submenu_list(client: AsyncClient, create_menu):
+async def test_emtpy_submenu_list(client: AsyncClient, create_menu) -> None:
     """Test submenu list is empty before creation"""
     response = await client.get(
         app.url_path_for('read_submenus', menu_id=create_menu['id'])
@@ -78,7 +86,7 @@ async def test_emtpy_submenu_list(client: AsyncClient, create_menu):
 # After submenu is created
 async def test_submenu_list_after_create(
     client: AsyncClient, create_menu, create_submenu
-):
+) -> None:
     """Test submenu list is not empty after creation"""
     response = await client.get(
         app.url_path_for('read_submenus', menu_id=create_menu['id'])
@@ -89,7 +97,7 @@ async def test_submenu_list_after_create(
 
 async def test_submenu_by_id_after_create(
     client: AsyncClient, create_menu, create_submenu
-):
+) -> None:
     """Test submenu exists after creation"""
     response = await client.get(
         app.url_path_for(
@@ -103,7 +111,7 @@ async def test_submenu_by_id_after_create(
 # After update
 async def test_updated_submenu_by_response(
     client: AsyncClient, create_menu, patch_submenu
-):
+) -> None:
     """Test that updated submenu changed it's values"""
     response = await client.get(
         app.url_path_for(
@@ -117,7 +125,7 @@ async def test_updated_submenu_by_response(
 # After submenu is deleted
 async def test_submenu_list_after_delete(
     client: AsyncClient, delete_submenu, create_menu
-):
+) -> None:
     """Test list is empty after submenu is deleted"""
     response = await client.get(
         app.url_path_for('read_submenus', menu_id=create_menu['id'])
@@ -128,7 +136,7 @@ async def test_submenu_list_after_delete(
 
 async def test_submenu_by_id_after_delete(
     client: AsyncClient, delete_submenu, create_menu
-):
+) -> None:
     """Test submenu doesn't exist after delete"""
     response = await client.get(
         app.url_path_for(
@@ -140,7 +148,7 @@ async def test_submenu_by_id_after_delete(
 
 
 # Test menu after menu is deleted
-async def test_menu_list_after_menu_delete(client: AsyncClient, create_menu):
+async def test_menu_list_after_menu_delete(client: AsyncClient, create_menu) -> None:
     """Test no menus after menu is deleted"""
     response = await client.delete(
         app.url_path_for('read_menu', menu_id=create_menu['id'])

@@ -9,7 +9,9 @@ from tests.test_dish import create_menu, create_submenu
 
 
 # Create dishes
-async def test_create_2_dishes(client: AsyncClient, create_menu, create_submenu):
+async def test_create_2_dishes(
+    client: AsyncClient, create_menu, create_submenu
+) -> None:
     """Test 2 dishes are 201"""
     data = (
         {
@@ -41,7 +43,7 @@ async def test_create_2_dishes(client: AsyncClient, create_menu, create_submenu)
 
 
 # Test menu by id
-async def test_get_menu_by_id(client: AsyncClient, create_menu):
+async def test_get_menu_by_id(client: AsyncClient, create_menu) -> None:
     """Test menu child count"""
     response = await client.get(
         app.url_path_for('read_menu', menu_id=create_menu['id'])
@@ -55,7 +57,9 @@ async def test_get_menu_by_id(client: AsyncClient, create_menu):
 
 
 # Test submenu by id
-async def test_get_submenu_by_id(client: AsyncClient, create_menu, create_submenu):
+async def test_get_submenu_by_id(
+    client: AsyncClient, create_menu, create_submenu
+) -> None:
     """Test submenu child dishes"""
     response = await client.get(
         app.url_path_for(
@@ -69,7 +73,9 @@ async def test_get_submenu_by_id(client: AsyncClient, create_menu, create_submen
 
 
 # Test delete submenu
-async def test_delete_submenu_by_id(client: AsyncClient, create_menu, create_submenu):
+async def test_delete_submenu_by_id(
+    client: AsyncClient, create_menu, create_submenu
+) -> None:
     """Test submenu successfully deleted"""
     response = await client.delete(
         app.url_path_for(
@@ -80,7 +86,7 @@ async def test_delete_submenu_by_id(client: AsyncClient, create_menu, create_sub
 
 
 # Test empty submenu list after submenu deletion
-async def test_submenu_list_after_delete(client: AsyncClient, create_menu):
+async def test_submenu_list_after_delete(client: AsyncClient, create_menu) -> None:
     """Test submenu list is empty after delete"""
     response = await client.get(
         app.url_path_for('read_submenus', menu_id=create_menu['id'])
@@ -92,7 +98,7 @@ async def test_submenu_list_after_delete(client: AsyncClient, create_menu):
 # Test dish list after submenu deletion
 async def test_dish_list_after_submenu_deletion(
     client: AsyncClient, create_menu, create_submenu
-):
+) -> None:
     """Test dish list is empty after submenu delete"""
     response = await client.get(
         app.url_path_for(
@@ -106,7 +112,7 @@ async def test_dish_list_after_submenu_deletion(
 
 
 # Test menu when all children are deleted
-async def test_get_menu_with_no_children(client: AsyncClient, create_menu):
+async def test_get_menu_with_no_children(client: AsyncClient, create_menu) -> None:
     """Test menu children count is zero"""
     response = await client.get(
         app.url_path_for('read_menu', menu_id=create_menu['id'])
@@ -120,7 +126,7 @@ async def test_get_menu_with_no_children(client: AsyncClient, create_menu):
 
 
 # Delete menu
-async def test_delete_menu(client: AsyncClient, create_menu):
+async def test_delete_menu(client: AsyncClient, create_menu) -> None:
     """Test menu deletes sucessfully"""
     response = await client.delete(
         app.url_path_for('delete_menu', menu_id=create_menu['id'])
@@ -131,7 +137,7 @@ async def test_delete_menu(client: AsyncClient, create_menu):
 # Test if menus are empty
 async def test_menu_list_after_delete(
     client: AsyncClient,
-):
+) -> None:
     """Test menu list is empty after delete"""
     response = await client.get(app.url_path_for('read_menus'))
     assert response.status_code == 200

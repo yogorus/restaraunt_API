@@ -1,4 +1,6 @@
 """Tests for general endpoint"""
+from typing import AsyncGenerator
+
 import pytest
 from httpx import AsyncClient
 
@@ -9,9 +11,9 @@ from src.main import app
 
 
 @pytest.fixture(scope='session')
-async def create_two_menus(client: AsyncClient):
+async def create_two_menus(client: AsyncClient) -> AsyncGenerator[list[dict], None]:
     """Create two menus"""
-    result = []
+    result: list[dict] = []
 
     for i in range(1, 3):
         sent_json = {'title': f'My menu {i}', 'description': f'My menu description {i}'}
@@ -30,7 +32,9 @@ async def create_two_menus(client: AsyncClient):
 
 
 @pytest.fixture(scope='session')
-async def update_first_menu(client: AsyncClient, create_two_menus):
+async def update_first_menu(
+    client: AsyncClient, create_two_menus
+) -> AsyncGenerator[dict, None]:
     """Update first menu"""
     sent_json = {
         'title': 'My updated menu 1',
@@ -55,7 +59,9 @@ async def update_first_menu(client: AsyncClient, create_two_menus):
 
 
 @pytest.fixture(scope='session')
-async def create_submenu_in_first_menu(client: AsyncClient, create_two_menus):
+async def create_submenu_in_first_menu(
+    client: AsyncClient, create_two_menus
+) -> AsyncGenerator[dict, None]:
     """Create submenu in first menu"""
     sent_json = {'title': 'My submenu 1', 'description': 'My submenu description 1'}
     response = await client.post(
@@ -75,9 +81,9 @@ async def create_submenu_in_first_menu(client: AsyncClient, create_two_menus):
 @pytest.fixture(scope='session')
 async def create_2_dishes_in_first_submenu(
     client: AsyncClient, create_submenu_in_first_menu
-):
+) -> AsyncGenerator[list[dict], None]:
     """Create 2 dishes in first submenu"""
-    result = []
+    result: list[dict] = []
 
     for i in range(1, 3):
         json = {
@@ -105,7 +111,9 @@ async def create_2_dishes_in_first_submenu(
 
 
 @pytest.fixture(scope='session')
-async def create_submenu_in_second_menu(client: AsyncClient, create_two_menus):
+async def create_submenu_in_second_menu(
+    client: AsyncClient, create_two_menus
+) -> AsyncGenerator[dict, None]:
     """Create submenu in second menu"""
     sent_json = {'title': 'My submenu 2', 'description': 'My submenu description 2'}
     response = await client.post(
@@ -122,7 +130,7 @@ async def create_submenu_in_second_menu(client: AsyncClient, create_two_menus):
 
 
 # Test that list is empty
-async def test_endpoint_is_empty(client: AsyncClient):
+async def test_endpoint_is_empty(client: AsyncClient) -> None:
     """Test list is empty"""
     response = await client.get(app.url_path_for('get_all'))
     assert response.status_code == 200
@@ -133,7 +141,7 @@ async def test_endpoint_is_empty(client: AsyncClient):
 async def test_endpoint_is_not_empty(
     client: AsyncClient,
     create_two_menus,
-):
+) -> None:
     """Test list is not empty"""
     response = await client.get(app.url_path_for('get_all'))
     response_json = response.json()
@@ -157,7 +165,9 @@ async def test_endpoint_is_not_empty(
 
 
 # Test submenu in first menu
-async def test_submenu_in_first_menu(client: AsyncClient, create_submenu_in_first_menu):
+async def test_submenu_in_first_menu(
+    client: AsyncClient, create_submenu_in_first_menu
+) -> None:
     """Test created submenu in first menu appeared in first menu"""
     response = await client.get(app.url_path_for('get_all'))
     assert response.status_code == 200
@@ -182,7 +192,7 @@ async def test_submenu_in_first_menu(client: AsyncClient, create_submenu_in_firs
 
 async def test_2_dishes_in_first_submenu(
     client: AsyncClient, create_2_dishes_in_first_submenu
-):
+) -> None:
     """Test 2 created dishes appeared in first submenu"""
     response = await client.get(app.url_path_for('get_all'))
     response_json = response.json()
@@ -200,7 +210,9 @@ async def test_2_dishes_in_first_submenu(
 
 
 # Update first menu and check the contents have changed
-async def test_endpoint_first_menu_after_update(client: AsyncClient, update_first_menu):
+async def test_endpoint_first_menu_after_update(
+    client: AsyncClient, update_first_menu
+) -> None:
     """Update first menu in the database and test if contents of endpoint have changed"""
     response = await client.get(app.url_path_for('get_all'))
     response_json = response.json()
@@ -217,7 +229,7 @@ async def test_endpoint_first_menu_after_update(client: AsyncClient, update_firs
 # Create second submenu in second menu and check for nested submenu
 async def test_endpoint_after_creating_second_submenu_in_second_menu(
     client: AsyncClient, create_submenu_in_second_menu
-):
+) -> None:
     """Create second submenu in second menu and check for changes"""
     response = await client.get(app.url_path_for('get_all'))
     response_json = response.json()
@@ -238,7 +250,7 @@ async def test_endpoint_after_creating_second_submenu_in_second_menu(
 # Delete all menus and check if endpoint returns empty list
 async def test_endpoint_after_deleting_menus(
     client: AsyncClient, create_submenu_in_second_menu
-):
+) -> None:
     """Delete all menus and check if endpoint returns empty list"""
     response = await client.get(app.url_path_for('get_all'))
     assert response.status_code == 200
