@@ -54,7 +54,8 @@ async def track_xlsx_to_db() -> None:
 
 
 @celery.task
-def run_async_xlsx_tracker():
+def run_async_xlsx_tracker() -> None:
     """Function to run the tracker in the event loop"""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(track_xlsx_to_db())
+    # loop = asyncio.get_event_loop()
+    # return loop.run_until_complete(track_xlsx_to_db())
+    asyncio.run(track_xlsx_to_db())
