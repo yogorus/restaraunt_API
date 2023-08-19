@@ -44,4 +44,4 @@ The documentaion for each route can be accessed in the **localhost:8000/redoc** 
 >
 > **/menus/{id}/submenus/** routes are almost the same as the **menus/**, to work correctly they require the parent Menu id to be in the URL path, which is also always validated.
 >
-> **/menus/{id}/submenus/{id}/dishes/** is nothing new too, except for listing dishes submenu validation is optional, due to postman tests(this was a course project, postman tests provided by platform). Pass the ?filter_by_submenu=true in the query to get child dishes of individual submenu. If this query param is not passed, it supposed to return all dishes without validation of parents.
+> **/menus/{id}/submenus/{id}/dishes/** is nothing new too, except for listing dishes submenu validation is optional, the reasion being postman tests(this was a course project, postman tests provided by platform). Pass the "?filter_by_submenu=true" in the query to get child dishes of individual submenu. If this query param is not passed, it supposed to return all dishes without validation of parents.
